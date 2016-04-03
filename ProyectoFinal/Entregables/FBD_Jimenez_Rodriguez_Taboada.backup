@@ -1,0 +1,2335 @@
+--
+-- PostgreSQL database dump
+--
+
+SET statement_timeout = 0;
+SET lock_timeout = 0;
+SET client_encoding = 'UTF8';
+SET standard_conforming_strings = on;
+SET check_function_bodies = false;
+SET client_min_messages = warning;
+
+--
+-- Name: plpgsql; Type: EXTENSION; Schema: -; Owner: 
+--
+
+CREATE EXTENSION IF NOT EXISTS plpgsql WITH SCHEMA pg_catalog;
+
+
+--
+-- Name: EXTENSION plpgsql; Type: COMMENT; Schema: -; Owner: 
+--
+
+COMMENT ON EXTENSION plpgsql IS 'PL/pgSQL procedural language';
+
+
+SET search_path = public, pg_catalog;
+
+--
+-- Name: pago_empleados(); Type: FUNCTION; Schema: public; Owner: ricardo_rodab
+--
+
+CREATE FUNCTION pago_empleados() RETURNS TABLE(id_pago integer, nombre character varying, pago numeric)
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+
+RETURN QUERY
+SELECT a.id_empleado,a.nombre_empleado,( ( ( ( CURRENT_DATE - b.fecha_ingreso) / 365) + 1) * 70.10)
+FROM empleado AS a INNER JOIN trabaja_en AS b ON
+(a.id_empleado = b.id_empleado);
+END;
+$$;
+
+
+ALTER FUNCTION public.pago_empleados() OWNER TO ricardo_rodab;
+
+--
+-- Name: sp_elimina_juguete_viejo(integer); Type: FUNCTION; Schema: public; Owner: ricardo_rodab
+--
+
+CREATE FUNCTION sp_elimina_juguete_viejo(codigo integer) RETURNS character varying
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+
+DELETE FROM juguete
+WHERE codigo_de_barras = codigo;
+
+RETURN 'Borrado_Exitosa';
+
+END;
+$$;
+
+
+ALTER FUNCTION public.sp_elimina_juguete_viejo(codigo integer) OWNER TO ricardo_rodab;
+
+--
+-- Name: sp_inserta_juguete_nuevo(integer, character varying, double precision, integer); Type: FUNCTION; Schema: public; Owner: ricardo_rodab
+--
+
+CREATE FUNCTION sp_inserta_juguete_nuevo(codigo integer, nombre character varying, precio1 double precision, clasificacion1 integer) RETURNS character varying
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+
+INSERT INTO juguete (codigo_de_barras, nombre_juguete,precio, clasificacion) VALUES (codigo, nombre, precio1, clasificacion1);
+
+RETURN 'Insercion_Exitosa';
+
+END;
+$$;
+
+
+ALTER FUNCTION public.sp_inserta_juguete_nuevo(codigo integer, nombre character varying, precio1 double precision, clasificacion1 integer) OWNER TO ricardo_rodab;
+
+SET default_tablespace = '';
+
+SET default_with_oids = false;
+
+--
+-- Name: articulo_pedido; Type: TABLE; Schema: public; Owner: ricardo_rodab; Tablespace: 
+--
+
+CREATE TABLE articulo_pedido (
+    id_articulo_pedido integer NOT NULL,
+    numero_articulos integer NOT NULL,
+    total double precision,
+    CONSTRAINT articulo_pedido_total_check CHECK ((total >= (0)::double precision))
+);
+
+
+ALTER TABLE articulo_pedido OWNER TO ricardo_rodab;
+
+--
+-- Name: cliente; Type: TABLE; Schema: public; Owner: ricardo_rodab; Tablespace: 
+--
+
+CREATE TABLE cliente (
+    id_cliente integer NOT NULL,
+    nombre_cliente character varying(230) NOT NULL,
+    apellido_paterno_cliente character varying(230),
+    apellido_materno_cliente character varying(230),
+    telefono_cliente bigint,
+    correo character varying(50) NOT NULL,
+    tarjeta_de_credito bigint
+);
+
+
+ALTER TABLE cliente OWNER TO ricardo_rodab;
+
+--
+-- Name: direccion_cliente; Type: TABLE; Schema: public; Owner: ricardo_rodab; Tablespace: 
+--
+
+CREATE TABLE direccion_cliente (
+    id_cliente integer NOT NULL,
+    calle_cliente character varying(250) NOT NULL,
+    estado_cliente character varying(230) NOT NULL,
+    numero_cliente integer NOT NULL,
+    colonia_cliente character varying(250) NOT NULL,
+    municipio_cliente character varying(250) NOT NULL
+);
+
+
+ALTER TABLE direccion_cliente OWNER TO ricardo_rodab;
+
+--
+-- Name: direccion_sucursal; Type: TABLE; Schema: public; Owner: ricardo_rodab; Tablespace: 
+--
+
+CREATE TABLE direccion_sucursal (
+    id_sucursal integer NOT NULL,
+    calle_sucursal character varying(250) NOT NULL,
+    estado_sucursal character varying(230) NOT NULL,
+    numero_sucursal integer NOT NULL,
+    colonia_sucursal character varying(250) NOT NULL,
+    municipio_sucursal character varying(250) NOT NULL
+);
+
+
+ALTER TABLE direccion_sucursal OWNER TO ricardo_rodab;
+
+--
+-- Name: distribuidor; Type: TABLE; Schema: public; Owner: ricardo_rodab; Tablespace: 
+--
+
+CREATE TABLE distribuidor (
+    id_distribuidor integer NOT NULL,
+    nombre_distribuidor character varying(220) NOT NULL
+);
+
+
+ALTER TABLE distribuidor OWNER TO ricardo_rodab;
+
+--
+-- Name: distribuye_a; Type: TABLE; Schema: public; Owner: ricardo_rodab; Tablespace: 
+--
+
+CREATE TABLE distribuye_a (
+    id_distribuidor integer NOT NULL,
+    id_marca integer NOT NULL
+);
+
+
+ALTER TABLE distribuye_a OWNER TO ricardo_rodab;
+
+--
+-- Name: empleado; Type: TABLE; Schema: public; Owner: ricardo_rodab; Tablespace: 
+--
+
+CREATE TABLE empleado (
+    id_empleado integer NOT NULL,
+    id_posicion integer NOT NULL,
+    rfc_empleado character varying(215) NOT NULL,
+    nombre_empleado character varying(230) NOT NULL,
+    apellido_materno_empleado character varying(230) NOT NULL,
+    apellido_paterno_empleado character varying(230) NOT NULL,
+    fecha_nacimiento date NOT NULL
+);
+
+
+ALTER TABLE empleado OWNER TO ricardo_rodab;
+
+--
+-- Name: es_dueno_de; Type: TABLE; Schema: public; Owner: ricardo_rodab; Tablespace: 
+--
+
+CREATE TABLE es_dueno_de (
+    codigo_barras integer NOT NULL,
+    id_marca integer NOT NULL,
+    deuda double precision NOT NULL
+);
+
+
+ALTER TABLE es_dueno_de OWNER TO ricardo_rodab;
+
+--
+-- Name: juguete; Type: TABLE; Schema: public; Owner: ricardo_rodab; Tablespace: 
+--
+
+CREATE TABLE juguete (
+    codigo_barras integer NOT NULL,
+    nombre_juguete character varying(250) NOT NULL,
+    precio double precision,
+    clasificacion integer NOT NULL,
+    CONSTRAINT juguete_precio_check CHECK ((precio >= (0)::double precision))
+);
+
+
+ALTER TABLE juguete OWNER TO ricardo_rodab;
+
+--
+-- Name: marca; Type: TABLE; Schema: public; Owner: ricardo_rodab; Tablespace: 
+--
+
+CREATE TABLE marca (
+    id_marca integer NOT NULL,
+    nombre_marca character varying(220) NOT NULL
+);
+
+
+ALTER TABLE marca OWNER TO ricardo_rodab;
+
+--
+-- Name: pedido; Type: TABLE; Schema: public; Owner: ricardo_rodab; Tablespace: 
+--
+
+CREATE TABLE pedido (
+    id_pedido integer NOT NULL,
+    id_articulo_pedido integer NOT NULL,
+    fecha_pedido timestamp without time zone NOT NULL
+);
+
+
+ALTER TABLE pedido OWNER TO ricardo_rodab;
+
+--
+-- Name: posicion; Type: TABLE; Schema: public; Owner: ricardo_rodab; Tablespace: 
+--
+
+CREATE TABLE posicion (
+    id_posicion integer NOT NULL,
+    posicion character varying(250) NOT NULL
+);
+
+
+ALTER TABLE posicion OWNER TO ricardo_rodab;
+
+--
+-- Name: realiza_compra; Type: TABLE; Schema: public; Owner: ricardo_rodab; Tablespace: 
+--
+
+CREATE TABLE realiza_compra (
+    id_cliente integer NOT NULL,
+    id_pedido integer NOT NULL
+);
+
+
+ALTER TABLE realiza_compra OWNER TO ricardo_rodab;
+
+--
+-- Name: sucursal; Type: TABLE; Schema: public; Owner: ricardo_rodab; Tablespace: 
+--
+
+CREATE TABLE sucursal (
+    id_sucursal integer NOT NULL,
+    nombre_sucursal character varying(250) NOT NULL,
+    telefono_sucursal bigint NOT NULL
+);
+
+
+ALTER TABLE sucursal OWNER TO ricardo_rodab;
+
+--
+-- Name: trabaja_en; Type: TABLE; Schema: public; Owner: ricardo_rodab; Tablespace: 
+--
+
+CREATE TABLE trabaja_en (
+    id_empleado integer NOT NULL,
+    id_sucursal integer NOT NULL,
+    fecha_ingreso date NOT NULL
+);
+
+
+ALTER TABLE trabaja_en OWNER TO ricardo_rodab;
+
+--
+-- Name: transaccion; Type: TABLE; Schema: public; Owner: ricardo_rodab; Tablespace: 
+--
+
+CREATE TABLE transaccion (
+    codigo_barras integer NOT NULL,
+    id_pedido integer NOT NULL,
+    id_sucursal integer NOT NULL
+);
+
+
+ALTER TABLE transaccion OWNER TO ricardo_rodab;
+
+--
+-- Data for Name: articulo_pedido; Type: TABLE DATA; Schema: public; Owner: ricardo_rodab
+--
+
+COPY articulo_pedido (id_articulo_pedido, numero_articulos, total) FROM stdin;
+1	13	3561
+2	88	4368
+3	69	7069
+4	80	6755
+5	85	2720
+6	11	6486
+7	86	4678
+8	31	9192
+9	75	3331
+10	33	5594
+11	37	3696
+12	12	469
+13	57	2846
+14	50	1646
+15	7	2243
+16	61	4157
+17	77	9638
+18	3	7153
+19	59	1403
+20	40	4783
+21	52	821
+22	13	8116
+23	51	9908
+24	97	9751
+25	85	3789
+26	57	2353
+27	85	9147
+28	54	9310
+29	5	5952
+30	39	5606
+31	67	1938
+32	65	6815
+33	55	1750
+34	60	5570
+35	100	1068
+36	44	3236
+37	45	2858
+38	52	9936
+39	41	2544
+40	55	2871
+41	23	9495
+42	81	6608
+43	76	4121
+44	11	8571
+45	99	8833
+46	34	6246
+47	56	9462
+48	25	7159
+49	93	9833
+50	48	9786
+51	23	4756
+52	78	1325
+53	55	1912
+54	71	4960
+55	29	7826
+56	51	4488
+57	60	1266
+58	74	725
+59	82	4107
+60	22	7299
+61	16	4201
+62	55	4588
+63	10	298
+64	79	1509
+65	51	3042
+66	8	2903
+67	77	3586
+68	16	1540
+69	70	5037
+70	53	7950
+71	75	9933
+72	38	5178
+73	28	7286
+74	3	8057
+75	60	7431
+76	7	8427
+77	83	8090
+78	16	6309
+79	13	6857
+80	10	6498
+81	42	9568
+82	82	709
+83	85	4097
+84	26	2613
+85	46	7440
+86	12	8705
+87	78	6691
+88	50	5325
+89	83	1290
+90	97	1572
+91	27	6248
+92	54	2386
+93	38	2913
+94	29	3324
+95	85	8558
+96	13	9442
+97	82	7577
+98	8	8396
+99	6	4588
+100	65	1251
+\.
+
+
+--
+-- Data for Name: cliente; Type: TABLE DATA; Schema: public; Owner: ricardo_rodab
+--
+
+COPY cliente (id_cliente, nombre_cliente, apellido_paterno_cliente, apellido_materno_cliente, telefono_cliente, correo, tarjeta_de_credito) FROM stdin;
+1	Bruno	Lindsay	Lindsey	5595015018	mauris.eu@tortoratrisus.net	4731879622675477
+2	Dieter	Gonzales	Mann	5587397095	eu@sedhendrerit.com	4671100996900346
+3	Dexter	Mills	Erickson	5581838383	luctus.felis.purus@dui.org	4559999328013507
+4	Kennan	Santos	West	5545459148	lobortis@tinciduntpede.org	4282907693274315
+5	Charles	Stewart	Torres	5565208215	dolor@Integervulputaterisus.ca	4191629882529370
+6	Fitzgerald	Shannon	Sutton	5579284795	mi@dictumauguemalesuada.edu	4431688611535355
+7	Bruce	Bartlett	Grant	5577145520	dolor@Quisque.org	4524764011939980
+8	Christian	Rowe	Mosley	5556232526	porttitor@mollisPhasellus.co	4543048527697109
+9	Ralph	Estrada	Leonard	5590504855	Sed@MaurisnullaInteger.net	4961852663243181
+10	Lewis	Bass	Sawyer	5579681696	nunc.risus.varius@erat.net	4524261768721048
+11	Wing	Zimmerman	Colon	5527265835	magna@et.org	4713741282699623
+12	Hedley	Everett	Sykes	5557931294	Cras.interdum.Nunc@eleifendnuncrisus.ca	4330689963605259
+13	Kenneth	Rogers	Mercer	5590371723	tristique.senectus.et@vel.edu	4544593571033328
+14	Kenyon	Green	Gould	5563995373	Cras.dictum.ultricies@eratvolutpatNulla.net	4481999908247969
+15	Tanner	Joyce	Gallegos	5532617830	auctor@odioNaminterdum.edu	4648820656072344
+16	Elliott	Coleman	Pearson	5588729580	eu.placerat.eget@montesnascetur.edu	4904653614712870
+17	Benedict	Callahan	Hickman	5516305766	egestas.Fusce@ProinultricesDuis.net	4146540243271737
+18	Ethan	Hampton	Ewing	5532921312	aliquam.arcu.Aliquam@semper.edu	4535308837564662
+19	Mark	Parks	Evans	5529063897	Mauris.molestie@odioAliquam.com	4226544085377825
+20	Evan	Maldonado	Gilbert	5530667083	blandit.congue.In@Phasellusdapibus.co.uk	4882715222425759
+21	Garrett	Mercado	Whitney	5588313587	gravida.non.sollicitudin@mifringillami.ca	4784414815157657
+22	Mufutau	Cooper	Porter	5511731447	egestas.urna@velvulputate.net	4175902574369680
+23	Denton	Cooper	Hubbard	5533642825	non@enim.edu	4819295282103125
+24	David	Bonner	Mcgee	5520822538	purus.sapien.gravida@orcisem.net	4418935994291673
+25	Timon	Barnes	Jennings	5573782123	erat@Nulla.co.uk	4954508356284354
+26	Matthew	Schwartz	Graham	5579961489	molestie@Quisque.com	4323031747248024
+27	Blake	Kennedy	Scott	5531915094	ante.iaculis.nec@tellusNunclectus.org	4728537431824954
+28	Cyrus	Charles	Rodriquez	5561806198	magna.sed.dui@dolor.net	4577049351623283
+29	Preston	Ryan	Hall	5529646153	et.tristique@In.org	4862948370445519
+30	Coby	Boyle	Snow	5559969707	ante.blandit@variusNamporttitor.net	4390933576691895
+31	Marvin	Deleon	Waters	5527523192	aliquam.enim@felis.net	4447877796506507
+32	Dieter	Bender	Horne	5594988011	neque.Sed.eget@dignissimlacus.com	4594827993120993
+33	Ahmed	Mcgee	Butler	5552095063	enim.Curabitur@Nuncmaurissapien.co.uk	4962034573592240
+34	Philip	Bennett	Burt	5595540680	mauris.Morbi.non@Nullamenim.edu	4907877124520017
+35	Leonard	Koch	Adkins	5535665701	adipiscing@turpis.ca	4777735686814417
+36	Lewis	Parker	Reeves	5591634518	accumsan.laoreet.ipsum@tinciduntadipiscing.edu	4153664456121627
+37	Vincent	Hicks	Bryant	5563934307	vulputate@gravidamauris.edu	4339565736474463
+38	Gannon	Pope	Skinner	5526725153	Suspendisse@etmagna.co.uk	4302499698754404
+39	Brian	Workman	Atkins	5529012250	ipsum.Phasellus@temporaugue.com	4596712983818723
+40	Preston	Herring	Mendez	5589428823	Nunc@Suspendisse.org	4301418399717657
+41	Kamal	Vinson	Le	5559127394	dolor.vitae@urna.org	4726761467475440
+42	Finn	Lawson	William	5588584305	adipiscing.Mauris@Nullamutnisi.com	4310454266937444
+43	Barclay	Nieves	Nolan	5526006950	nunc.id.enim@accumsan.edu	4532108363322912
+44	Clarke	Farmer	Banks	5522831564	accumsan.laoreet.ipsum@SedmolestieSed.org	4271355038927869
+45	Amir	Donaldson	Craig	5522754392	aliquet.molestie.tellus@acmattis.net	4692454175185414
+46	Giacomo	Anderson	Mcmillan	5593960570	tempus.mauris@Praesenteu.com	4180929019395268
+47	Rigel	Waters	Acevedo	5531784599	rutrum.urna.nec@pretium.ca	4176008653640749
+48	Emerson	Potter	Hopkins	5575209820	justo.faucibus@orci.com	4738994418457159
+49	Elliott	Burt	Mercado	5553285512	ante.blandit@aliquet.com	4616237856959925
+50	Jonas	Burch	Wong	5571790109	odio.Phasellus@scelerisquenequeNullam.edu	4302552739018573
+51	James	Rosa	Colon	5554612732	non.lacinia@CurabiturmassaVestibulum.edu	4621709640882905
+52	Jasper	Blanchard	Burris	5575346282	Duis.gravida.Praesent@Crasloremlorem.org	4400652672536675
+53	Tanek	Clay	Nieves	5537240427	Phasellus@Vivamusrhoncus.com	4378455313388250
+54	Knox	Chan	Burt	5523816173	fringilla.mi@commodo.co.uk	4441004922986030
+55	Leroy	Dejesus	Gould	5597710217	natoque.penatibus@Sedpharetra.ca	4719588666828344
+56	Edan	Lee	Dudley	5555060409	erat.semper.rutrum@ridiculusmus.com	4332963669672608
+57	Lucius	Riggs	Mcclain	5596849595	quis.accumsan@Sedcongue.co.uk	4664036670653141
+58	Merrill	Flynn	Pugh	5560079201	dignissim@mauris.net	4448126098653309
+59	Nehru	Henderson	Blair	5528922982	Curae.Donec@sodales.com	4810013021295891
+60	Dieter	Gillespie	Bradley	5595918566	libero@malesuadamalesuadaInteger.ca	4526985041098665
+61	Cade	Duncan	Graves	5561462233	lorem.ut@sapienCras.org	4739059675345191
+62	Coby	Smith	Bradley	5513722655	semper.et.lacinia@massalobortis.ca	4257890818221493
+63	Fulton	Bishop	Sheppard	5554521708	risus@ametrisus.org	4121813034638761
+64	Quamar	Vega	Mccray	5534352449	sed.facilisis@feugiat.net	4701094249356537
+65	Zahir	Rivers	Meyer	5548850375	Quisque.fringilla.euismod@Fuscediam.org	4165767942741510
+66	Ryder	Casey	Pruitt	5524779390	urna.suscipit.nonummy@vulputatevelit.org	4799548721453172
+67	Rahim	Carver	Donovan	5523824516	ultricies@mollis.ca	4754758705478165
+68	Hamilton	Marsh	Henderson	5518837490	felis.ullamcorper@posuereenimnisl.ca	4405333679215984
+69	August	Stanley	Bridges	5521882181	mus@Cras.net	4102048420207579
+70	Daniel	Obrien	Marquez	5547673932	amet.nulla@disparturient.co.uk	4351471689715985
+71	Wylie	Nieves	Strickland	5532723368	blandit.congue@turpisvitae.edu	4606752078933649
+72	Garth	Sparks	Blankenship	5552975204	Morbi.neque.tellus@pellentesquea.net	4728809888102115
+73	Derek	Norris	Curtis	5585281855	enim.non@id.edu	4561925956653439
+74	Dillon	Walton	Richard	5553781929	Duis@anteipsumprimis.edu	4138860442256558
+75	Peter	Buckley	Winters	5591085624	rutrum@euismodenim.edu	4900164927029980
+76	Caleb	Snow	Bryant	5564008352	rutrum.non.hendrerit@duiaugueeu.net	4254380131838840
+77	Ferdinand	Hardy	Kinney	5577588179	nec.leo.Morbi@dis.net	4219789461651811
+78	Elliott	Chen	Mendoza	5574858261	tellus.Nunc@lobortisultrices.net	4976173580670726
+79	Vernon	Kent	Mullen	5584377572	risus.varius.orci@ategestas.org	4893374550715089
+80	Elvis	Yang	Bowman	5536156142	ut.molestie.in@scelerisque.co.uk	4736027319030835
+81	Brody	Rosario	Pena	5547808087	ipsum.Phasellus.vitae@AliquamnislNulla.ca	4278726319689300
+82	Charles	Hurst	Morton	5536859054	aliquet.magna.a@ametluctus.org	4515084191597990
+83	Alan	Schmidt	Vance	5588822611	cursus.Nunc@Aliquam.co.uk	4136679991567506
+84	Steel	Gallegos	Riggs	5528384531	urna@pedemalesuadavel.ca	4557181633077568
+85	Fuller	White	Ayers	5552509770	dictum@egetmollis.com	4856089115003129
+86	Jarrod	Ballard	Jefferson	5514671344	vulputate.posuere.vulputate@egestasAliquam.com	4756268658395859
+87	Conan	Robertson	Kinney	5551259677	ligula.consectetuer@elit.edu	4790145302750172
+88	Cain	Watkins	Curtis	5536175161	a.enim@augueporttitorinterdum.com	4520125785656279
+89	Raymond	Landry	Cook	5580834222	Nam.interdum.enim@enim.ca	4204394757049157
+90	Arden	Lang	Kelly	5530240964	Fusce.dolor.quam@natoquepenatibus.co.uk	4600158324465156
+91	Dorian	Nieves	Marshall	5574819087	magnis@orciquislectus.com	4947110826754948
+92	Tiger	Stevenson	Cortez	5519427117	luctus.ut.pellentesque@idrisus.com	4843454432813459
+93	Justin	Glenn	Wiggins	5592472003	habitant.morbi.tristique@lectus.co.uk	4758049142686659
+94	Benedict	Nelson	Gibson	5532265376	scelerisque.lorem.ipsum@ipsumprimis.edu	4968923861393705
+95	Dieter	Ashley	Pena	5562945082	amet.faucibus@non.com	4544548682169985
+96	Boris	Kelley	Poole	5530969014	neque.pellentesque@veliteu.ca	4823817085428169
+97	Forrest	Casey	Logan	5552151305	Nullam.ut@ornareliberoat.com	4768472582846876
+98	Brady	Calhoun	Bean	5542569595	a.feugiat.tellus@ametconsectetueradipiscing.co.uk	4299307387648152
+99	Benedict	Carrillo	Nichols	5522794588	egestas.a.scelerisque@estarcu.ca	4229150765063247
+100	Eagan	Harmon	Kelley	5511184277	non.lobortis.quis@magnaSedeu.net	4770521003473555
+\.
+
+
+--
+-- Data for Name: direccion_cliente; Type: TABLE DATA; Schema: public; Owner: ricardo_rodab
+--
+
+COPY direccion_cliente (id_cliente, calle_cliente, estado_cliente, numero_cliente, colonia_cliente, municipio_cliente) FROM stdin;
+1	7763 Integer Road	Uzbekistan	1	Delaware	Dover
+2	961-3714 Quisque St.	Guam	2	UP	Firozabad
+3	9361 Iaculis Rd.	Switzerland	3	Nebraska	Grand Island
+4	Ap #763-7850 Et Rd.	Angola	4	ON	Richmond Hill
+5	Ap #569-7201 Amet Av.	Bolivia	5	BE	Berlin
+6	P.O. Box 473, 6142 Nisl St.	Indonesia	6	British Columbia	Fort St. John
+7	4466 Amet Rd.	Trinidad and Tobago	7	AS	Gijón
+8	861 Enim, Rd.	Congo (Brazzaville)	8	Diy	Silvan
+9	P.O. Box 455, 1435 Odio. Ave	Belarus	9	OY	Igboho
+10	7348 Ullamcorper, Rd.	Ethiopia	10	AN	Dos Hermanas
+11	Ap #993-8205 Sed St.	Tajikistan	11	LB	Gorzów Wielkopolski
+12	468-2023 Quisque Av.	Namibia	12	Saxony	Riesa
+13	Ap #814-745 Ultrices Rd.	Bermuda	13	New South Wales	Tamworth
+14	378-7047 Aliquam Road	Bahamas	14	Pennsylvania	Harrisburg
+15	866-4222 Duis St.	Samoa	15	Ayd	Kuşadası
+16	P.O. Box 229, 5185 Nec Av.	Timor-Leste	16	PIE	Mombaruzzo
+17	723-7906 Feugiat Ave	Curaçao	17	Oklahoma	Norman
+18	4343 Malesuada St.	Afghanistan	18	CO	Colorado Springs
+19	P.O. Box 460, 6575 Eget Ave	Lebanon	19	Şanlıurfa	Siverek
+20	Ap #339-8180 Lectus Av.	Western Sahara	20	NSW	Dubbo
+21	Ap #748-1842 Tempus Av.	Korea, North	21	Overijssel	Oldenzaal
+22	Ap #658-9066 Justo Street	Cyprus	22	ERM	Monticelli d'Ongina
+23	P.O. Box 465, 709 Sed Ave	Dominica	23	CO	Ajaccio
+24	P.O. Box 829, 9788 Integer Road	Germany	24	PE	Stratford
+25	Ap #974-9858 Fusce Av.	Serbia	25	Bihar	Katihar
+26	P.O. Box 685, 6621 Mauris Av.	Rwanda	26	Tamil Nadu	Kanchipuram
+27	Ap #632-7696 Et, Av.	Malta	27	Catalunya	L'Hospitalet de Llobregat
+28	332-9771 Nonummy Street	Heard Island and Mcdonald Islands	28	Vienna	Vienna
+29	8607 Neque. St.	Thailand	29	Arizona	Mesa
+30	2569 Suspendisse Road	Guernsey	30	Picardie	Soissons
+31	286 Ipsum Rd.	Equatorial Guinea	31	IL	Aulnay-sous-Bois
+32	Ap #678-6556 Vulputate, Rd.	Jordan	32	ON	Grey County
+33	P.O. Box 378, 5216 Quam. Road	Niue	33	FC	Montbéliard
+34	500-167 Enim, St.	Iran	34	Missouri	Saint Louis
+35	Ap #523-1952 Vel St.	Saint Lucia	35	WA	Seattle
+36	Ap #817-8134 Dolor. Street	Botswana	36	Pernambuco	Olinda
+37	Ap #612-2199 Sem Rd.	Laos	37	Andalucía	Huelva
+38	P.O. Box 592, 8812 Vel, St.	Niger	38	OG	Abeokuta
+39	698-5821 Lacus. Rd.	South Georgia and The South Sandwich Islands	39	PB	Santa Rita
+40	Ap #974-3082 Quam, St.	Honduras	40	BO	Bama
+41	P.O. Box 356, 4445 Mollis. Road	Bulgaria	41	MA	São Luís
+42	7737 Lectus Road	Uzbekistan	42	AL	Saint-Louis
+43	8802 Tempor St.	Antigua and Barbuda	43	ABR	Sant'Omero
+44	P.O. Box 323, 9848 Est Rd.	Cocos (Keeling) Islands	44	Dolnośląskie	Legnica
+45	Ap #454-4924 Aliquam Av.	Guam	45	Hertfordshire	St. Albans
+46	630-9721 Magna Ave	Sri Lanka	46	G	Liberia
+47	Ap #873-6070 Rutrum Avenue	Norfolk Island	47	Paraíba	Patos
+48	8552 Amet Road	China	48	MG	Uberlândia
+49	P.O. Box 487, 3143 Dolor Av.	Saint Martin	49	Nebraska	Kearney
+50	1242 Auctor, Avenue	Micronesia	50	WI	Kenosha
+51	9961 Molestie Avenue	Central African Republic	51	SJ	Patarrá
+52	Ap #497-7415 Eu Rd.	South Georgia and The South Sandwich Islands	52	SP	Piracicaba
+53	3906 Arcu. St.	Philippines	53	ABR	Roio del Sangro
+54	9149 Amet Street	Barbados	54	Wie	Vienna
+55	Ap #510-597 Dictum Ave	Iraq	55	Wielkopolskie	Kalisz
+56	P.O. Box 978, 6870 At, Road	Cambodia	56	ON	Aurora
+57	169-5335 Non, St.	Morocco	57	CE	Juazeiro do Norte
+58	P.O. Box 857, 7517 Tincidunt Road	Panama	58	Ontario	Thunder Bay
+59	1723 Mauris Road	Antarctica	59	DE	Warri
+60	3752 In St.	Macedonia	60	Zl	Terneuzen
+61	P.O. Box 144, 3323 Vitae Street	Virgin Islands, United States	61	LA	Lagos
+62	2953 Rutrum Rd.	Djibouti	62	Vienna	Vienna
+63	P.O. Box 921, 8054 Mauris Road	Romania	63	Nebraska	Omaha
+64	2782 Bibendum Road	Bulgaria	64	Provence-Alpes-Côte d'Azur	La Seyne-sur-Mer
+65	7973 Sem Av.	Angola	65	TAA	Centa San Nicolò
+66	Ap #645-482 Nascetur St.	United Kingdom (Great Britain)	66	NV	Carson City
+67	5172 Vitae Street	Cayman Islands	67	DS	Jelenia Góra
+68	P.O. Box 933, 7796 Ac St.	Bahamas	68	Kon	Konya
+69	P.O. Box 678, 2006 Mollis. Rd.	Bahamas	69	łódzkie	Łódź
+70	4428 Justo Street	United Kingdom (Great Britain)	70	Campania	Acerra
+71	664-8165 Donec Avenue	Iraq	71	Castilla y León	Segovia
+72	2345 Nec Road	Thailand	72	BE	Berlin
+73	Ap #231-1020 Varius Ave	Niue	73	Kentucky	Covington
+74	Ap #276-6744 Libero St.	Trinidad and Tobago	74	ERM	Pievepelago
+75	227-5289 Nec, Rd.	Finland	75	Ontario	Ajax
+76	1839 Erat, Road	Comoros	76	Catalunya	Lleida
+77	P.O. Box 631, 684 Praesent Av.	Faroe Islands	77	San José	San Vicente
+78	Ap #586-7126 Eros Street	Cook Islands	78	BE	Berlin
+79	8497 Lacus. Road	Dominican Republic	79	UT	Haridwar
+80	2941 Augue Av.	Mozambique	80	Missouri	Saint Louis
+81	775 Fermentum Avenue	Uruguay	81	Oregon	Hillsboro
+82	Ap #135-4578 Quisque Street	Mauritania	82	North Island	Palmerston North
+83	P.O. Box 602, 417 Nullam St.	United Arab Emirates	83	Victoria	Benalla
+84	5509 Purus Rd.	Ukraine	84	PA	Abaetetuba
+85	6333 Nibh St.	Indonesia	85	Georgia	Athens
+86	Ap #424-945 Felis, Rd.	Romania	86	Île-de-France	Champigny-sur-Marne
+87	Ap #637-3142 Non, St.	Suriname	87	Wielkopolskie	Piła
+88	Ap #849-9119 Morbi Av.	Djibouti	88	ON	Grey County
+89	Ap #420-6730 Convallis, St.	Cook Islands	89	PV	Gasteiz
+90	2995 Elementum Rd.	Luxembourg	90	CA	Sacramento
+91	P.O. Box 675, 9527 Mauris Ave	Algeria	91	NSW	Goulburn
+92	8852 Faucibus St.	Gibraltar	92	BC	Castlegar
+93	260-8336 Sit Street	Cuba	93	Wie	Vienna
+94	P.O. Box 631, 8699 Dui. Ave	Moldova	94	Quebec	L�vis
+95	576-2976 Ultricies Rd.	Comoros	95	IL	Champigny-sur-Marne
+96	1695 At Av.	Guadeloupe	96	Brussels Hoofdstedelijk Gewest	Koekelberg
+97	265-7369 Sem Av.	Moldova	97	MO	Monmouth
+98	Ap #396-3991 Lorem Street	Chile	98	L	Dublin
+99	8566 Gravida St.	Philippines	99	MA	Warszawa
+100	9200 Nibh Street	American Samoa	100	JH	Dhanbad
+\.
+
+
+--
+-- Data for Name: direccion_sucursal; Type: TABLE DATA; Schema: public; Owner: ricardo_rodab
+--
+
+COPY direccion_sucursal (id_sucursal, calle_sucursal, estado_sucursal, numero_sucursal, colonia_sucursal, municipio_sucursal) FROM stdin;
+1	7763 Integer Road	Uzbekistan	1	Delaware	Dover
+2	961-3714 Quisque St.	Guam	2	UP	Firozabad
+3	9361 Iaculis Rd.	Switzerland	3	Nebraska	Grand Island
+4	Ap #763-7850 Et Rd.	Angola	4	ON	Richmond Hill
+5	Ap #569-7201 Amet Av.	Bolivia	5	BE	Berlin
+6	P.O. Box 473, 6142 Nisl St.	Indonesia	6	British Columbia	Fort St. John
+7	4466 Amet Rd.	Trinidad and Tobago	7	AS	Gijón
+8	861 Enim, Rd.	Congo (Brazzaville)	8	Diy	Silvan
+9	P.O. Box 455, 1435 Odio. Ave	Belarus	9	OY	Igboho
+10	7348 Ullamcorper, Rd.	Ethiopia	10	AN	Dos Hermanas
+11	Ap #993-8205 Sed St.	Tajikistan	11	LB	Gorzów Wielkopolski
+12	468-2023 Quisque Av.	Namibia	12	Saxony	Riesa
+13	Ap #814-745 Ultrices Rd.	Bermuda	13	New South Wales	Tamworth
+14	378-7047 Aliquam Road	Bahamas	14	Pennsylvania	Harrisburg
+15	866-4222 Duis St.	Samoa	15	Ayd	Kuşadası
+16	P.O. Box 229, 5185 Nec Av.	Timor-Leste	16	PIE	Mombaruzzo
+17	723-7906 Feugiat Ave	Curaçao	17	Oklahoma	Norman
+18	4343 Malesuada St.	Afghanistan	18	CO	Colorado Springs
+19	P.O. Box 460, 6575 Eget Ave	Lebanon	19	Şanlıurfa	Siverek
+20	Ap #339-8180 Lectus Av.	Western Sahara	20	NSW	Dubbo
+21	Ap #748-1842 Tempus Av.	Korea, North	21	Overijssel	Oldenzaal
+22	Ap #658-9066 Justo Street	Cyprus	22	ERM	Monticelli d'Ongina
+23	P.O. Box 465, 709 Sed Ave	Dominica	23	CO	Ajaccio
+24	P.O. Box 829, 9788 Integer Road	Germany	24	PE	Stratford
+25	Ap #974-9858 Fusce Av.	Serbia	25	Bihar	Katihar
+26	P.O. Box 685, 6621 Mauris Av.	Rwanda	26	Tamil Nadu	Kanchipuram
+27	Ap #632-7696 Et, Av.	Malta	27	Catalunya	L'Hospitalet de Llobregat
+28	332-9771 Nonummy Street	Heard Island and Mcdonald Islands	28	Vienna	Vienna
+29	8607 Neque. St.	Thailand	29	Arizona	Mesa
+30	2569 Suspendisse Road	Guernsey	30	Picardie	Soissons
+31	286 Ipsum Rd.	Equatorial Guinea	31	IL	Aulnay-sous-Bois
+32	Ap #678-6556 Vulputate, Rd.	Jordan	32	ON	Grey County
+33	P.O. Box 378, 5216 Quam. Road	Niue	33	FC	Montbéliard
+34	500-167 Enim, St.	Iran	34	Missouri	Saint Louis
+35	Ap #523-1952 Vel St.	Saint Lucia	35	WA	Seattle
+36	Ap #817-8134 Dolor. Street	Botswana	36	Pernambuco	Olinda
+37	Ap #612-2199 Sem Rd.	Laos	37	Andalucía	Huelva
+38	P.O. Box 592, 8812 Vel, St.	Niger	38	OG	Abeokuta
+39	698-5821 Lacus. Rd.	South Georgia and The South Sandwich Islands	39	PB	Santa Rita
+40	Ap #974-3082 Quam, St.	Honduras	40	BO	Bama
+41	P.O. Box 356, 4445 Mollis. Road	Bulgaria	41	MA	São Luís
+42	7737 Lectus Road	Uzbekistan	42	AL	Saint-Louis
+43	8802 Tempor St.	Antigua and Barbuda	43	ABR	Sant'Omero
+44	P.O. Box 323, 9848 Est Rd.	Cocos (Keeling) Islands	44	Dolnośląskie	Legnica
+45	Ap #454-4924 Aliquam Av.	Guam	45	Hertfordshire	St. Albans
+46	630-9721 Magna Ave	Sri Lanka	46	G	Liberia
+47	Ap #873-6070 Rutrum Avenue	Norfolk Island	47	Paraíba	Patos
+48	8552 Amet Road	China	48	MG	Uberlândia
+49	P.O. Box 487, 3143 Dolor Av.	Saint Martin	49	Nebraska	Kearney
+50	1242 Auctor, Avenue	Micronesia	50	WI	Kenosha
+51	9961 Molestie Avenue	Central African Republic	51	SJ	Patarrá
+52	Ap #497-7415 Eu Rd.	South Georgia and The South Sandwich Islands	52	SP	Piracicaba
+53	3906 Arcu. St.	Philippines	53	ABR	Roio del Sangro
+54	9149 Amet Street	Barbados	54	Wie	Vienna
+55	Ap #510-597 Dictum Ave	Iraq	55	Wielkopolskie	Kalisz
+56	P.O. Box 978, 6870 At, Road	Cambodia	56	ON	Aurora
+57	169-5335 Non, St.	Morocco	57	CE	Juazeiro do Norte
+58	P.O. Box 857, 7517 Tincidunt Road	Panama	58	Ontario	Thunder Bay
+59	1723 Mauris Road	Antarctica	59	DE	Warri
+60	3752 In St.	Macedonia	60	Zl	Terneuzen
+61	P.O. Box 144, 3323 Vitae Street	Virgin Islands, United States	61	LA	Lagos
+62	2953 Rutrum Rd.	Djibouti	62	Vienna	Vienna
+63	P.O. Box 921, 8054 Mauris Road	Romania	63	Nebraska	Omaha
+64	2782 Bibendum Road	Bulgaria	64	Provence-Alpes-Côte d'Azur	La Seyne-sur-Mer
+65	7973 Sem Av.	Angola	65	TAA	Centa San Nicolò
+66	Ap #645-482 Nascetur St.	United Kingdom (Great Britain)	66	NV	Carson City
+67	5172 Vitae Street	Cayman Islands	67	DS	Jelenia Góra
+68	P.O. Box 933, 7796 Ac St.	Bahamas	68	Kon	Konya
+69	P.O. Box 678, 2006 Mollis. Rd.	Bahamas	69	łódzkie	Łódź
+70	4428 Justo Street	United Kingdom (Great Britain)	70	Campania	Acerra
+71	664-8165 Donec Avenue	Iraq	71	Castilla y León	Segovia
+72	2345 Nec Road	Thailand	72	BE	Berlin
+73	Ap #231-1020 Varius Ave	Niue	73	Kentucky	Covington
+74	Ap #276-6744 Libero St.	Trinidad and Tobago	74	ERM	Pievepelago
+75	227-5289 Nec, Rd.	Finland	75	Ontario	Ajax
+76	1839 Erat, Road	Comoros	76	Catalunya	Lleida
+77	P.O. Box 631, 684 Praesent Av.	Faroe Islands	77	San José	San Vicente
+78	Ap #586-7126 Eros Street	Cook Islands	78	BE	Berlin
+79	8497 Lacus. Road	Dominican Republic	79	UT	Haridwar
+80	2941 Augue Av.	Mozambique	80	Missouri	Saint Louis
+81	775 Fermentum Avenue	Uruguay	81	Oregon	Hillsboro
+82	Ap #135-4578 Quisque Street	Mauritania	82	North Island	Palmerston North
+83	P.O. Box 602, 417 Nullam St.	United Arab Emirates	83	Victoria	Benalla
+84	5509 Purus Rd.	Ukraine	84	PA	Abaetetuba
+85	6333 Nibh St.	Indonesia	85	Georgia	Athens
+86	Ap #424-945 Felis, Rd.	Romania	86	Île-de-France	Champigny-sur-Marne
+87	Ap #637-3142 Non, St.	Suriname	87	Wielkopolskie	Piła
+88	Ap #849-9119 Morbi Av.	Djibouti	88	ON	Grey County
+89	Ap #420-6730 Convallis, St.	Cook Islands	89	PV	Gasteiz
+90	2995 Elementum Rd.	Luxembourg	90	CA	Sacramento
+91	P.O. Box 675, 9527 Mauris Ave	Algeria	91	NSW	Goulburn
+92	8852 Faucibus St.	Gibraltar	92	BC	Castlegar
+93	260-8336 Sit Street	Cuba	93	Wie	Vienna
+94	P.O. Box 631, 8699 Dui. Ave	Moldova	94	Quebec	L�vis
+95	576-2976 Ultricies Rd.	Comoros	95	IL	Champigny-sur-Marne
+96	1695 At Av.	Guadeloupe	96	Brussels Hoofdstedelijk Gewest	Koekelberg
+97	265-7369 Sem Av.	Moldova	97	MO	Monmouth
+98	Ap #396-3991 Lorem Street	Chile	98	L	Dublin
+99	8566 Gravida St.	Philippines	99	MA	Warszawa
+100	9200 Nibh Street	American Samoa	100	JH	Dhanbad
+\.
+
+
+--
+-- Data for Name: distribuidor; Type: TABLE DATA; Schema: public; Owner: ricardo_rodab
+--
+
+COPY distribuidor (id_distribuidor, nombre_distribuidor) FROM stdin;
+1	Libero Proin Corporation
+2	Enim Nec Tempus Associates
+3	Eu Associates
+4	Pede Ultrices A Corp.
+5	Augue Eu LLC
+6	Consectetuer Ltd
+7	Id Corporation
+8	Tellus Ltd
+9	Eget Corporation
+10	Dolor Corp.
+11	Egestas Fusce Aliquet Consulting
+12	Libero PC
+13	Nulla Company
+14	Fringilla Cursus Purus Associates
+15	Ipsum Suspendisse Non PC
+16	Rutrum Lorem Limited
+17	Id Mollis Nec Corp.
+18	Nisi Dictum PC
+19	Venenatis Vel Foundation
+20	Eu Tellus Inc.
+21	Ultrices Industries
+22	Vitae Purus Corporation
+23	Cras Institute
+24	Feugiat Tellus Company
+25	Elit Fermentum Foundation
+26	Ultrices Mauris Ipsum Company
+27	Aliquam LLC
+28	Natoque Penatibus Et PC
+29	Fringilla Inc.
+30	Velit Eget Industries
+31	Enim Associates
+32	Sem Associates
+33	Nunc Ltd
+34	Luctus Ut Company
+35	Nec Mauris Blandit Limited
+36	Ultricies Sem Industries
+37	Donec Felis LLC
+38	Ac Eleifend Vitae Ltd
+39	Aliquam Arcu LLP
+40	Etiam Bibendum Consulting
+41	Nunc Quisque Foundation
+42	Fermentum Vel Mauris Inc.
+43	Consequat Auctor Company
+44	Nullam Nisl PC
+45	Elementum Lorem Corp.
+46	Nibh Foundation
+47	Dui In Foundation
+48	Vivamus Foundation
+49	Arcu Vestibulum Ante Consulting
+50	In Limited
+51	Ac Turpis Egestas Associates
+52	Commodo Tincidunt Nibh Corp.
+53	Adipiscing Institute
+54	Enim LLP
+55	Nullam Enim Sed Industries
+56	Vel Arcu Associates
+57	Molestie Tortor Nibh Corp.
+58	Libero Incorporated
+59	Nulla Integer Incorporated
+60	Libero Dui PC
+61	Ut Tincidunt Orci Institute
+62	Metus Facilisis Limited
+63	Quis Pede Praesent LLP
+64	Ornare Elit Foundation
+65	Cursus In Hendrerit Institute
+66	Phasellus Elit Incorporated
+67	Pretium Et Institute
+68	Eu Inc.
+69	Rhoncus Incorporated
+70	Aliquam LLP
+71	Lectus Sit Amet Company
+72	Elit Nulla LLC
+73	Lacus Vestibulum Associates
+74	Luctus Consulting
+75	Nisl Sem Consequat Institute
+76	Tellus Phasellus Elit Ltd
+77	Cras Interdum Nunc LLC
+78	Vehicula LLC
+79	Nec Ante Maecenas Corp.
+80	Libero Limited
+81	Elit A Limited
+82	Dictum Eu LLP
+83	Ac Company
+84	Proin Vel Institute
+85	Neque Nullam Nisl Associates
+86	Commodo Ipsum Suspendisse Limited
+87	Augue Eu Corporation
+88	Magnis Dis Parturient LLP
+89	Mi Duis Foundation
+90	In LLP
+91	Ut Nulla Cras Company
+92	Nulla PC
+93	Vestibulum Corporation
+94	Amet Risus Company
+95	Cursus Vestibulum Mauris Limited
+96	Dolor Foundation
+97	Tincidunt Nibh Phasellus Limited
+98	Id Corporation
+99	Proin Industries
+100	Ipsum Phasellus Institute
+\.
+
+
+--
+-- Data for Name: distribuye_a; Type: TABLE DATA; Schema: public; Owner: ricardo_rodab
+--
+
+COPY distribuye_a (id_distribuidor, id_marca) FROM stdin;
+1	100
+2	99
+3	98
+4	97
+5	96
+6	95
+7	94
+8	93
+9	92
+10	91
+11	90
+12	89
+13	88
+14	87
+15	86
+16	85
+17	84
+18	83
+19	82
+20	81
+21	80
+22	79
+23	78
+24	77
+25	76
+26	75
+27	74
+28	73
+29	72
+30	71
+31	70
+32	69
+33	68
+34	67
+35	66
+36	65
+37	64
+38	63
+39	62
+40	61
+41	60
+42	59
+43	58
+44	57
+45	56
+46	55
+47	54
+48	53
+49	52
+50	51
+51	50
+52	49
+53	48
+54	47
+55	46
+56	45
+57	44
+58	43
+59	42
+60	41
+61	40
+62	39
+63	38
+64	37
+65	36
+66	35
+67	34
+68	33
+69	32
+70	31
+71	30
+72	29
+73	28
+74	27
+75	26
+76	25
+77	24
+78	23
+79	22
+80	21
+81	20
+82	19
+83	18
+84	17
+85	16
+86	15
+87	14
+88	13
+89	12
+90	11
+91	10
+92	9
+93	8
+94	7
+95	6
+96	5
+97	4
+98	3
+99	2
+100	1
+\.
+
+
+--
+-- Data for Name: empleado; Type: TABLE DATA; Schema: public; Owner: ricardo_rodab
+--
+
+COPY empleado (id_empleado, id_posicion, rfc_empleado, nombre_empleado, apellido_materno_empleado, apellido_paterno_empleado, fecha_nacimiento) FROM stdin;
+1	1	342640923928683	Lamar	Patrick	Oneil	2016-05-18
+2	2	349321124353483	Ali	Irwin	Hubbard	2015-06-26
+3	3	340709810195979	Nita	Ortiz	Blevins	2015-02-13
+4	4	342755822767832	Malcolm	Mckenzie	Garrett	2016-05-25
+5	5	372426608354954	Jolie	Nielsen	Sanders	2015-09-12
+6	6	343644669751357	Laura	Kelly	Buck	2016-06-27
+7	7	343862650478190	Whoopi	Donaldson	Porter	2015-01-19
+8	8	373897132091321	Charde	Donovan	English	2015-11-28
+9	9	371281069909924	Harding	Duke	Herman	2016-01-14
+10	10	342082392443771	Velma	Cabrera	Gonzales	2014-12-23
+11	11	344602808162661	Brody	Henson	Lowe	2016-08-11
+12	12	377185309893992	Alfreda	Cobb	Romero	2016-09-11
+13	13	343737935103385	Shea	Nicholson	Schneider	2016-08-13
+14	14	342270171121680	Jena	Parsons	Coffey	2015-04-18
+15	15	371849147447958	Sonia	Austin	Monroe	2016-07-02
+16	16	342648017096838	Garrett	Frederick	Townsend	2015-09-06
+17	17	376594133010387	Iona	Hicks	Ross	2015-01-31
+18	18	372635085417494	Ulysses	Gonzales	Cooke	2016-11-23
+19	19	340295006019058	Kylee	Harrington	Christensen	2016-05-06
+20	20	375901670213194	Penelope	Chavez	Weaver	2015-01-20
+21	21	377060647741791	Stacy	Garrett	Bartlett	2016-10-17
+22	22	341929633331952	Brock	William	Thompson	2015-10-23
+23	23	342180049404756	Calvin	Farley	Orr	2015-04-27
+24	24	371925108034793	Octavius	Swanson	Vasquez	2016-04-20
+25	25	344313594044572	Samuel	Knowles	Lancaster	2016-10-23
+26	26	372937469222049	Karina	Green	Goff	2015-05-07
+27	27	348416455124973	Nichole	Cervantes	Snider	2015-10-24
+28	28	378868563534530	Iris	Reeves	Hamilton	2016-04-22
+29	29	349425016033515	Willa	Bright	Boyer	2015-10-25
+30	30	346440443522660	Clark	Cabrera	West	2015-06-27
+31	31	373824997466703	Mechelle	Christian	Lang	2016-06-16
+32	32	341664644064405	Tatiana	Allison	Haney	2015-10-18
+33	33	348111469008789	Vera	Burgess	Contreras	2016-08-24
+34	34	378050185823316	Coby	Roberson	Knowles	2015-11-24
+35	35	371886488643704	Michael	Donovan	Wagner	2016-01-06
+36	36	341738958270053	Keaton	Alston	Hensley	2015-01-04
+37	37	344358436840729	Rina	Koch	Mcdowell	2015-03-06
+38	38	378724404064916	Hakeem	Stewart	Soto	2016-03-10
+39	39	378237564857003	Victor	Baker	Smith	2016-05-19
+40	40	346278400211202	Marsden	Wilkinson	Conrad	2016-05-17
+41	41	340723882786276	Bryar	Norman	Roman	2015-12-30
+42	42	343117175476207	Halla	Montoya	Vargas	2015-11-18
+43	43	378133687437650	Ifeoma	Aguirre	Weber	2015-09-02
+44	44	375276192946302	Molly	Ingram	Mcintosh	2015-04-15
+45	45	374107436831052	Iliana	Malone	Dotson	2015-12-17
+46	46	347301300759879	Pascale	Cain	Dominguez	2015-04-18
+47	47	379791283721279	Hiroko	Swanson	Mclaughlin	2016-01-21
+48	48	375912385975100	Macon	Vega	Levy	2015-11-29
+49	49	375474607313644	Jaquelyn	Yates	Monroe	2015-08-27
+50	50	375582776782777	Molly	Deleon	Pollard	2015-11-03
+51	51	348011575682230	Louis	Henderson	Gonzales	2016-06-04
+52	52	373098600881711	Larissa	Riley	Keith	2016-05-24
+53	53	340510250979462	Cole	Schmidt	Roberts	2015-04-19
+54	54	374794540024755	William	Bell	Hull	2016-01-12
+55	55	370705363071248	Willow	Mcguire	Schultz	2015-07-28
+56	56	341077922693912	Larissa	Carr	Mcdonald	2015-02-04
+57	57	342493493805596	Naomi	Oneil	Willis	2016-01-30
+58	58	349020538215862	Rogan	Middleton	Emerson	2016-06-26
+59	59	345212171590362	Barry	Cain	Knox	2016-02-27
+60	60	340671702534584	Alma	Hudson	Rios	2016-11-04
+61	61	346595375806819	Bruno	Massey	Hess	2015-10-27
+62	62	372563387252064	Bradley	Horne	Riddle	2016-06-19
+63	63	370052478710505	Xavier	Wallace	Bray	2015-10-29
+64	64	348819588470959	Keely	Roy	Kim	2015-07-27
+65	65	346573188553514	Brian	Roth	Cabrera	2016-11-03
+66	66	373585857693625	Olivia	Gutierrez	Browning	2016-07-25
+67	67	373417869190574	Griffith	Yates	Dickerson	2015-05-27
+68	68	343235871493225	Nigel	Mcneil	Howell	2015-11-16
+69	69	343885211744479	Ryder	Kramer	Holt	2016-05-09
+70	70	376586592139012	Seth	Espinoza	Golden	2015-11-28
+71	71	342687070230744	Sacha	Stanley	Meadows	2015-08-09
+72	72	343638443604049	Ivory	Abbott	Lambert	2015-03-27
+73	73	347411041215808	Sade	Wells	Smith	2016-07-27
+74	74	374239436679353	Aphrodite	Riddle	Yang	2016-06-21
+75	75	377223333817230	Alvin	George	Rice	2016-05-08
+76	76	342825976448446	Melanie	Lucas	Whitney	2015-08-24
+77	77	343531315859173	Cleo	Raymond	Mccoy	2014-12-26
+78	78	371400506761223	Leila	Logan	Black	2015-02-07
+79	79	347470335785918	Angelica	Kim	Hobbs	2014-12-01
+80	80	346398284627438	Kaye	Keller	Frederick	2015-09-14
+81	81	377953382893241	Aimee	Emerson	Mcclure	2016-09-27
+82	82	344024340152441	Zeph	Compton	Calderon	2015-08-05
+83	83	373560546178668	Sigourney	Schwartz	Allen	2015-12-28
+84	84	347371261915323	Haviva	Curry	Fulton	2016-08-19
+85	85	376692815078977	Ila	Thompson	Hudson	2015-06-27
+86	86	349432033721858	Molly	Bradford	Cervantes	2016-01-18
+87	87	379935074598343	Mechelle	Lindsay	Malone	2016-06-07
+88	88	348672324015368	Karleigh	Knowles	Bradshaw	2016-06-01
+89	89	370353916073229	Jesse	Freeman	Oneil	2016-06-09
+90	90	379332348406844	Kasimir	Edwards	Ramirez	2015-08-18
+91	91	378337531445641	Warren	Joseph	Pugh	2016-08-26
+92	92	349912660658689	Tashya	Johns	Calhoun	2014-12-10
+93	93	378515291060318	Madaline	Gomez	Dodson	2016-04-18
+94	94	341401665927818	Mona	Simpson	Walters	2016-11-04
+95	95	343966781072978	Zenia	Ruiz	Snyder	2016-10-26
+96	96	379246916851860	April	Kim	Castaneda	2015-09-12
+97	97	376914462078138	Angelica	Washington	Jimenez	2015-11-17
+98	98	379887616537604	Minerva	Jarvis	Carlson	2016-03-29
+99	99	343827314895592	Nissim	Whitley	Golden	2015-09-02
+100	100	343038372830840	Vladimir	Small	Macdonald	2016-03-12
+\.
+
+
+--
+-- Data for Name: es_dueno_de; Type: TABLE DATA; Schema: public; Owner: ricardo_rodab
+--
+
+COPY es_dueno_de (codigo_barras, id_marca, deuda) FROM stdin;
+23	23	91272
+24	24	4055
+25	25	2135
+26	26	65134
+27	27	65512
+28	28	19706
+29	29	92268
+30	30	25801
+31	31	15259
+32	32	56621
+33	33	47876
+34	34	45343
+35	35	14246
+36	36	39423
+37	37	30014
+38	38	73589
+39	39	30080
+40	40	97454
+41	41	73778
+42	42	29734
+43	43	20118
+44	44	18256
+45	45	3927
+46	46	16032
+47	47	26269
+48	48	1536
+49	49	35174
+50	50	88754
+51	51	35411
+52	52	19045
+53	53	53727
+54	54	80659
+55	55	81833
+56	56	40330
+57	57	49369
+58	58	2883
+59	59	46795
+60	60	90212
+61	61	71002
+62	62	26146
+63	63	15290
+64	64	38490
+65	65	52793
+66	66	71412
+67	67	52424
+68	68	39608
+69	69	50482
+70	70	90737
+71	71	57748
+72	72	89078
+73	73	1722
+74	74	33717
+75	75	85884
+76	76	16030
+77	77	17371
+78	78	22775
+79	79	22950
+80	80	3958
+81	81	13185
+82	82	51569
+83	83	52625
+84	84	16150
+85	85	24877
+86	86	65161
+87	87	14155
+88	88	39620
+89	89	58958
+90	90	85205
+91	91	64200
+92	92	8823
+93	93	62668
+94	94	750
+95	95	32104
+96	96	18629
+97	97	31985
+98	98	63306
+99	99	15133
+100	100	44396
+\.
+
+
+--
+-- Data for Name: juguete; Type: TABLE DATA; Schema: public; Owner: ricardo_rodab
+--
+
+COPY juguete (codigo_barras, nombre_juguete, precio, clasificacion) FROM stdin;
+1	Donec	260	11
+2	dolor	561	16
+3	pharetra.	537	16
+4	Donec	1099	17
+5	placerat	693	13
+6	turpis	1353	14
+7	pulvinar	700	11
+8	vitae	80	6
+9	a	1634	8
+10	at,	1727	14
+11	tristique	1757	8
+12	amet	640	3
+13	amet,	985	3
+14	tellus	424	12
+15	convallis	906	18
+16	ornare,	742	17
+17	Duis	770	3
+18	ornare	1872	5
+19	turpis	239	19
+20	Aliquam	1567	11
+21	Donec	1623	16
+22	nunc	1752	9
+23	enim,	450	11
+24	Quisque	1613	19
+25	Aenean	1319	19
+26	in	1283	18
+27	Sed	1396	15
+28	ultrices	1397	17
+29	Cum	1044	18
+30	Nulla	1762	9
+31	sit	1614	20
+32	magna	565	11
+33	odio.	841	14
+34	mi	1277	16
+35	Suspendisse	527	20
+36	facilisis	1809	7
+37	rhoncus.	1254	5
+38	Nulla	1341	7
+39	egestas,	203	10
+40	nonummy	950	18
+41	nibh	1426	6
+42	lacus.	1709	15
+43	nunc.	1491	13
+44	lacus.	1610	3
+45	ornare,	608	20
+46	metus.	1504	14
+47	accumsan	555	8
+48	nec,	740	13
+49	at	486	4
+50	Ut	527	14
+51	habitant	899	4
+52	egestas,	264	15
+53	lectus	1408	16
+54	eget	506	7
+55	sit	649	16
+56	tortor.	1438	9
+57	adipiscing.	1546	10
+58	libero.	1434	12
+59	convallis	528	17
+60	erat,	376	14
+61	amet	815	4
+62	at,	628	5
+63	laoreet,	154	6
+64	felis	1590	3
+65	quam	1908	17
+66	a,	802	11
+67	nec	1560	14
+68	euismod	1074	6
+69	tristique	850	16
+70	orci	1915	14
+71	aliquet.	684	20
+72	nascetur	412	6
+73	sagittis	1162	15
+74	cursus	1286	20
+75	Aenean	1307	9
+76	varius	856	14
+77	Maecenas	987	10
+78	purus.	332	11
+79	Etiam	1184	9
+80	pede,	1447	12
+81	dui,	816	3
+82	tortor	389	10
+83	mus.	1863	7
+84	enim	202	6
+85	Fusce	233	10
+86	tincidunt	1084	12
+87	lacus.	818	4
+88	Etiam	804	10
+89	vitae	373	19
+90	velit.	1165	11
+91	non	1235	18
+92	elit	171	20
+93	Nunc	1333	10
+94	eu	1886	9
+95	sodales	1900	7
+96	Aenean	1151	17
+97	nec	502	17
+98	congue	41	4
+99	Sed	1584	8
+100	amet	606	13
+\.
+
+
+--
+-- Data for Name: marca; Type: TABLE DATA; Schema: public; Owner: ricardo_rodab
+--
+
+COPY marca (id_marca, nombre_marca) FROM stdin;
+1	Finale
+2	Cakewalk
+3	Borland
+4	Altavista
+5	Yahoo
+6	Borland
+7	Lycos
+8	Apple Systems
+9	Cakewalk
+10	Adobe
+11	Altavista
+12	Sibelius
+13	Altavista
+14	Yahoo
+15	Chami
+16	Lavasoft
+17	Adobe
+18	Finale
+19	Microsoft
+20	Google
+21	Google
+22	Cakewalk
+23	Adobe
+24	Google
+25	Yahoo
+26	Borland
+27	Sibelius
+28	Adobe
+29	Microsoft
+30	Lavasoft
+31	Microsoft
+32	Sibelius
+33	Finale
+34	Microsoft
+35	Finale
+36	Google
+37	Altavista
+38	Cakewalk
+39	Apple Systems
+40	Yahoo
+41	Adobe
+42	Lavasoft
+43	Yahoo
+44	Adobe
+45	Lavasoft
+46	Adobe
+47	Cakewalk
+48	Lycos
+49	Altavista
+50	Chami
+51	Chami
+52	Altavista
+53	Lavasoft
+54	Yahoo
+55	Yahoo
+56	Yahoo
+57	Chami
+58	Macromedia
+59	Microsoft
+60	Finale
+61	Altavista
+62	Borland
+63	Adobe
+64	Sibelius
+65	Lavasoft
+66	Altavista
+67	Apple Systems
+68	Yahoo
+69	Apple Systems
+70	Apple Systems
+71	Google
+72	Chami
+73	Finale
+74	Altavista
+75	Yahoo
+76	Altavista
+77	Finale
+78	Adobe
+79	Altavista
+80	Sibelius
+81	Lavasoft
+82	Adobe
+83	Lavasoft
+84	Sibelius
+85	Macromedia
+86	Cakewalk
+87	Microsoft
+88	Microsoft
+89	Yahoo
+90	Lavasoft
+91	Lycos
+92	Microsoft
+93	Yahoo
+94	Google
+95	Chami
+96	Cakewalk
+97	Altavista
+98	Finale
+99	Cakewalk
+100	Microsoft
+\.
+
+
+--
+-- Data for Name: pedido; Type: TABLE DATA; Schema: public; Owner: ricardo_rodab
+--
+
+COPY pedido (id_pedido, id_articulo_pedido, fecha_pedido) FROM stdin;
+1	89	2016-03-28 00:00:00
+2	77	2016-10-12 00:00:00
+3	47	2015-02-06 00:00:00
+4	72	2015-12-28 00:00:00
+5	79	2016-09-12 00:00:00
+6	100	2016-04-14 00:00:00
+7	96	2016-05-19 00:00:00
+8	14	2015-01-31 00:00:00
+9	40	2015-04-02 00:00:00
+10	64	2015-08-02 00:00:00
+11	81	2016-10-11 00:00:00
+12	84	2015-01-21 00:00:00
+13	80	2015-10-26 00:00:00
+14	7	2015-12-23 00:00:00
+15	42	2015-09-30 00:00:00
+16	94	2015-05-25 00:00:00
+17	63	2015-03-17 00:00:00
+18	49	2016-05-12 00:00:00
+19	85	2016-03-24 00:00:00
+20	94	2015-04-15 00:00:00
+21	92	2015-06-15 00:00:00
+22	5	2016-10-20 00:00:00
+23	97	2014-12-21 00:00:00
+24	61	2015-07-03 00:00:00
+25	53	2015-08-27 00:00:00
+26	28	2016-09-01 00:00:00
+27	96	2016-08-04 00:00:00
+28	8	2015-08-14 00:00:00
+29	13	2016-10-13 00:00:00
+30	15	2016-04-17 00:00:00
+31	76	2015-01-18 00:00:00
+32	98	2015-08-30 00:00:00
+33	77	2015-11-28 00:00:00
+34	9	2015-08-05 00:00:00
+35	27	2015-08-12 00:00:00
+36	50	2015-04-11 00:00:00
+37	76	2016-02-18 00:00:00
+38	17	2015-05-29 00:00:00
+39	39	2016-08-03 00:00:00
+40	65	2016-04-28 00:00:00
+41	46	2015-09-24 00:00:00
+42	44	2016-09-03 00:00:00
+43	54	2015-12-21 00:00:00
+44	47	2015-11-04 00:00:00
+45	35	2015-04-27 00:00:00
+46	10	2015-03-23 00:00:00
+47	27	2016-04-07 00:00:00
+48	79	2015-07-23 00:00:00
+49	26	2016-01-27 00:00:00
+50	38	2016-10-10 00:00:00
+51	8	2015-06-06 00:00:00
+52	16	2014-12-04 00:00:00
+53	96	2016-06-24 00:00:00
+54	17	2016-10-20 00:00:00
+55	46	2014-12-05 00:00:00
+56	95	2015-05-22 00:00:00
+57	55	2015-11-09 00:00:00
+58	14	2016-01-06 00:00:00
+59	15	2015-07-14 00:00:00
+60	92	2016-03-27 00:00:00
+61	65	2016-03-07 00:00:00
+62	84	2015-07-29 00:00:00
+63	12	2015-08-24 00:00:00
+64	76	2016-04-18 00:00:00
+65	54	2015-05-02 00:00:00
+66	62	2015-05-06 00:00:00
+67	17	2016-01-21 00:00:00
+68	72	2016-03-09 00:00:00
+69	63	2015-01-13 00:00:00
+70	38	2015-07-27 00:00:00
+71	85	2016-06-10 00:00:00
+72	26	2016-08-29 00:00:00
+73	24	2015-05-21 00:00:00
+74	51	2015-07-08 00:00:00
+75	61	2015-11-05 00:00:00
+76	79	2016-07-30 00:00:00
+77	4	2016-09-23 00:00:00
+78	68	2015-03-21 00:00:00
+79	90	2016-05-04 00:00:00
+80	68	2015-07-06 00:00:00
+81	28	2015-08-18 00:00:00
+82	28	2015-12-05 00:00:00
+83	58	2016-08-10 00:00:00
+84	54	2015-05-12 00:00:00
+85	62	2016-08-31 00:00:00
+86	31	2015-12-13 00:00:00
+87	100	2015-03-04 00:00:00
+88	99	2014-12-03 00:00:00
+89	42	2016-01-08 00:00:00
+90	12	2015-10-03 00:00:00
+91	88	2016-05-05 00:00:00
+92	73	2015-02-17 00:00:00
+93	6	2015-10-14 00:00:00
+94	72	2015-05-17 00:00:00
+95	51	2016-10-27 00:00:00
+96	86	2016-06-24 00:00:00
+97	39	2016-01-09 00:00:00
+98	31	2015-05-01 00:00:00
+99	100	2015-12-02 00:00:00
+100	61	2014-12-27 00:00:00
+\.
+
+
+--
+-- Data for Name: posicion; Type: TABLE DATA; Schema: public; Owner: ricardo_rodab
+--
+
+COPY posicion (id_posicion, posicion) FROM stdin;
+1	Legal Department
+2	Legal Department
+3	Advertising
+4	Customer Relations
+5	Sales and Marketing
+6	Asset Management
+7	Sales and Marketing
+8	Finances
+9	Customer Service
+10	Customer Relations
+11	Finances
+12	Media Relations
+13	Media Relations
+14	Accounting
+15	Finances
+16	Payroll
+17	Media Relations
+18	Payroll
+19	Public Relations
+20	Advertising
+21	Payroll
+22	Advertising
+23	Accounting
+24	Advertising
+25	Customer Relations
+26	Sales and Marketing
+27	Asset Management
+28	Research and Development
+29	Human Resources
+30	Sales and Marketing
+31	Finances
+32	Research and Development
+33	Payroll
+34	Accounting
+35	Legal Department
+36	Legal Department
+37	Legal Department
+38	Advertising
+39	Media Relations
+40	Advertising
+41	Asset Management
+42	Customer Service
+43	Accounting
+44	Media Relations
+45	Tech Support
+46	Public Relations
+47	Quality Assurance
+48	Sales and Marketing
+49	Advertising
+50	Tech Support
+51	Media Relations
+52	Research and Development
+53	Public Relations
+54	Finances
+55	Accounting
+56	Sales and Marketing
+57	Research and Development
+58	Accounting
+59	Payroll
+60	Quality Assurance
+61	Sales and Marketing
+62	Media Relations
+63	Accounting
+64	Research and Development
+65	Finances
+66	Human Resources
+67	Advertising
+68	Quality Assurance
+69	Research and Development
+70	Human Resources
+71	Human Resources
+72	Research and Development
+73	Customer Service
+74	Public Relations
+75	Public Relations
+76	Asset Management
+77	Advertising
+78	Research and Development
+79	Media Relations
+80	Customer Relations
+81	Accounting
+82	Asset Management
+83	Advertising
+84	Customer Relations
+85	Payroll
+86	Asset Management
+87	Customer Relations
+88	Customer Service
+89	Public Relations
+90	Payroll
+91	Media Relations
+92	Customer Relations
+93	Asset Management
+94	Media Relations
+95	Media Relations
+96	Finances
+97	Research and Development
+98	Tech Support
+99	Customer Relations
+100	Quality Assurance
+\.
+
+
+--
+-- Data for Name: realiza_compra; Type: TABLE DATA; Schema: public; Owner: ricardo_rodab
+--
+
+COPY realiza_compra (id_cliente, id_pedido) FROM stdin;
+1	1
+2	2
+3	3
+4	4
+5	5
+6	6
+7	7
+8	8
+9	9
+10	10
+11	11
+12	12
+13	13
+14	14
+15	15
+16	16
+17	17
+18	18
+19	19
+20	20
+21	21
+22	22
+23	23
+24	24
+25	25
+26	26
+27	27
+28	28
+29	29
+30	30
+31	31
+32	32
+33	33
+34	34
+35	35
+36	36
+37	37
+38	38
+39	39
+40	40
+41	41
+42	42
+43	43
+44	44
+45	45
+46	46
+47	47
+48	48
+49	49
+50	50
+51	51
+52	52
+53	53
+54	54
+55	55
+56	56
+57	57
+58	58
+59	59
+60	60
+61	61
+62	62
+63	63
+64	64
+65	65
+66	66
+67	67
+68	68
+69	69
+70	70
+71	71
+72	72
+73	73
+74	74
+75	75
+76	76
+77	77
+78	78
+79	79
+80	80
+81	81
+82	82
+83	83
+84	84
+85	85
+86	86
+87	87
+88	88
+89	89
+90	90
+91	91
+92	92
+93	93
+94	94
+95	95
+96	96
+97	97
+98	98
+99	99
+100	100
+\.
+
+
+--
+-- Data for Name: sucursal; Type: TABLE DATA; Schema: public; Owner: ricardo_rodab
+--
+
+COPY sucursal (id_sucursal, nombre_sucursal, telefono_sucursal) FROM stdin;
+1	Nullam Vitae Diam Incorporated	5538154945
+2	Pharetra Sed Hendrerit Ltd	5585412952
+3	Amet Ltd	5522009103
+4	Integer Consulting	5580184902
+5	Faucibus Id Libero Consulting	5590174909
+6	Ac Mattis Velit LLP	5580836111
+7	Cursus Vestibulum Mauris Industries	5555371350
+8	Justo Eu Arcu Ltd	5584364622
+9	Natoque Penatibus Et Limited	5597648585
+10	Nunc Est Company	5583150747
+11	Sagittis Duis Gravida Associates	5531493158
+12	Curabitur Dictum Phasellus Ltd	5533045611
+13	Amet Consulting	5511415580
+14	Mi Lorem Vehicula Consulting	5535736566
+15	Cursus Non LLC	5565222788
+16	Phasellus In LLP	5530922978
+17	Curabitur Egestas Nunc Corporation	5517457647
+18	Nam Inc.	5549077444
+19	Eget Ipsum Suspendisse Limited	5577232116
+20	Duis A Foundation	5544617731
+21	Enim LLP	5538174375
+22	Suspendisse Dui Limited	5598425824
+23	In LLC	5566440926
+24	Nunc Sollicitudin Commodo Institute	5576005479
+25	Tempus Eu Limited	5592775677
+26	Gravida Nunc Sed Corp.	5544054445
+27	Rhoncus Nullam Velit Limited	5578505135
+28	Orci Phasellus Dapibus Industries	5561788477
+29	Dictum Eleifend Nunc Institute	5595863725
+30	Augue LLC	5516284642
+31	Nec Limited	5523813005
+32	Dolor LLP	5586174327
+33	Dignissim Magna Associates	5536149679
+34	Sem Ut Industries	5565633385
+35	Cursus A Enim Limited	5544024131
+36	In Faucibus Orci LLC	5516780632
+37	Gravida Sit Amet LLC	5517764834
+38	Mi Ac Consulting	5587464513
+39	Nisl PC	5540566953
+40	Massa Rutrum Magna Inc.	5570544525
+41	Diam Lorem Company	5534631021
+42	Arcu Ac PC	5543321337
+43	Aenean Sed Pede Corporation	5521367238
+44	Vel PC	5537336871
+45	Sagittis Industries	5570770490
+46	Magna Suspendisse Tristique Company	5580068138
+47	Eget Inc.	5553325624
+48	Magna Consulting	5538349680
+49	Nisl Maecenas Consulting	5585688439
+50	Venenatis Lacus Etiam LLC	5516788926
+51	Mi Pede Nonummy Incorporated	5598675463
+52	Purus Corporation	5566123583
+53	Nulla Limited	5591030049
+54	Ac Metus Vitae PC	5577993484
+55	Montes Incorporated	5585207911
+56	Nunc Commodo Incorporated	5522690337
+57	Ligula Aenean Euismod Ltd	5575164709
+58	Non Lobortis Ltd	5514644265
+59	Tristique Pellentesque Tellus Foundation	5578301830
+60	Metus Aenean Sed Inc.	5573393897
+61	Eu Limited	5569612739
+62	Ipsum Leo Elementum Consulting	5598297091
+63	Etiam Bibendum Limited	5593974533
+64	Malesuada Fringilla Est Institute	5594886048
+65	Auctor Corp.	5594199486
+66	Aenean Sed Pede Associates	5587661435
+67	Eleifend Nec Malesuada Limited	5521274614
+68	Diam At Industries	5528566690
+69	Integer Vulputate Corp.	5583362257
+70	Dictum LLC	5576702343
+71	Vestibulum Institute	5553660736
+72	Vivamus Nisi Industries	5581137652
+73	Curabitur Company	5567730366
+74	Elementum Sem Vitae PC	5548916275
+75	Consectetuer Euismod Est Foundation	5598729714
+76	Et Eros Proin Ltd	5579184432
+77	Egestas Aliquam LLC	5561587882
+78	Suscipit Est Limited	5515406700
+79	Adipiscing Lacus LLC	5559677628
+80	Libero Lacus LLP	5527453979
+81	Pretium Et Limited	5591795036
+82	Ipsum Incorporated	5572035661
+83	Felis Consulting	5563623363
+84	Morbi Neque Tellus LLC	5550624743
+85	Sit Ltd	5583241666
+86	Pellentesque PC	5533058791
+87	Vulputate Posuere Vulputate Inc.	5569779613
+88	Aliquam Inc.	5593941270
+89	Maecenas Libero Est LLP	5553323241
+90	Lorem Ipsum Dolor PC	5544324832
+91	Donec Consectetuer Consulting	5521048124
+92	Odio Etiam Ligula Ltd	5570465271
+93	Quisque Fringilla Consulting	5524214047
+94	Neque Associates	5515496564
+95	Nunc Est Institute	5591134432
+96	Magna LLC	5524504624
+97	Feugiat Company	5520342031
+98	Tristique Aliquet Ltd	5594882305
+99	Maecenas Libero Est PC	5597185175
+100	Nec Quam Corporation	5575840113
+\.
+
+
+--
+-- Data for Name: trabaja_en; Type: TABLE DATA; Schema: public; Owner: ricardo_rodab
+--
+
+COPY trabaja_en (id_empleado, id_sucursal, fecha_ingreso) FROM stdin;
+1	1	2010-05-02
+2	2	2004-12-03
+3	3	2006-09-12
+4	4	2006-09-28
+5	5	2006-08-10
+6	6	2005-06-07
+7	7	2015-04-25
+8	8	0209-12-24
+9	9	2010-08-17
+10	10	2010-01-16
+11	11	2001-05-05
+12	12	2002-12-23
+13	13	2003-06-21
+14	14	2004-11-05
+15	15	2005-11-30
+16	16	2006-10-04
+17	17	2007-05-22
+18	18	2008-08-14
+19	19	2009-09-22
+20	20	2010-02-19
+21	21	2011-03-24
+22	22	2012-10-12
+23	23	2013-04-30
+24	24	2014-07-10
+25	25	2015-10-10
+26	26	2010-04-03
+27	27	2000-07-02
+28	28	2015-10-14
+29	29	2001-04-25
+30	30	2005-10-30
+31	31	2015-06-25
+32	32	2016-01-02
+33	33	2016-09-13
+34	34	2016-10-25
+35	35	2016-09-24
+36	36	2015-07-22
+37	37	2016-09-25
+38	38	2015-06-04
+39	39	2015-10-21
+40	40	2016-07-07
+41	41	2015-10-08
+42	42	2015-09-02
+43	43	2016-07-11
+44	44	2016-11-02
+45	45	2016-07-16
+46	46	2015-01-31
+47	47	2015-06-03
+48	48	2016-05-08
+49	49	2015-04-20
+50	50	2015-12-25
+51	51	2016-02-11
+52	52	2016-11-08
+53	53	2016-10-27
+54	54	2015-07-16
+55	55	2015-08-11
+56	56	2015-12-17
+57	57	2015-08-04
+58	58	2015-06-12
+59	59	2016-08-09
+60	60	2015-03-11
+61	61	2016-05-15
+62	62	2016-06-12
+63	63	2016-02-29
+64	64	2016-01-14
+65	65	2015-02-26
+66	66	2015-08-22
+67	67	2016-09-24
+68	68	2016-01-10
+69	69	2016-09-11
+70	70	2015-04-25
+71	71	2016-06-14
+72	72	2016-06-19
+73	73	2016-10-19
+74	74	2015-07-28
+75	75	2015-01-01
+76	76	2015-04-21
+77	77	2016-08-18
+78	78	2015-05-27
+79	79	2016-05-01
+80	80	2015-10-02
+81	81	2015-02-06
+82	82	2016-07-13
+83	83	2016-08-31
+84	84	2016-03-18
+85	85	2015-05-04
+86	86	2014-12-05
+87	87	2015-04-10
+88	88	2016-06-14
+89	89	2016-01-18
+90	90	2016-02-15
+91	91	2015-10-18
+92	92	2015-11-11
+93	93	2016-05-05
+94	94	2016-10-27
+95	95	2016-02-04
+96	96	2015-07-18
+97	97	2015-09-17
+98	98	2016-09-15
+99	99	2015-03-31
+100	100	2014-12-05
+\.
+
+
+--
+-- Data for Name: transaccion; Type: TABLE DATA; Schema: public; Owner: ricardo_rodab
+--
+
+COPY transaccion (codigo_barras, id_pedido, id_sucursal) FROM stdin;
+67	95	68
+10	71	7
+66	76	13
+33	63	59
+11	10	64
+98	47	27
+18	100	31
+21	94	75
+74	57	73
+34	63	69
+80	5	81
+1	85	9
+13	22	17
+92	28	20
+82	9	9
+9	16	1
+61	89	59
+20	16	22
+3	78	35
+97	29	9
+63	91	80
+50	70	48
+24	26	90
+100	9	5
+13	76	10
+49	91	38
+68	17	43
+96	48	72
+69	94	50
+76	15	16
+40	88	21
+97	54	78
+19	79	59
+4	67	89
+93	58	77
+48	58	1
+73	37	33
+35	76	100
+98	44	48
+47	77	46
+10	37	27
+63	36	52
+18	79	91
+21	42	10
+78	45	72
+7	39	13
+72	91	17
+28	78	64
+14	43	100
+96	66	79
+56	15	82
+54	51	97
+52	36	78
+49	3	27
+17	59	6
+1	32	93
+41	85	81
+36	59	53
+90	86	29
+48	95	28
+90	30	57
+68	11	39
+9	66	32
+81	98	52
+73	64	57
+15	40	18
+89	95	34
+7	36	52
+2	30	89
+24	53	69
+89	16	8
+32	95	30
+89	22	22
+46	10	8
+8	19	83
+66	74	82
+36	40	66
+84	17	68
+69	95	74
+94	17	63
+7	35	23
+54	43	36
+34	81	77
+88	14	51
+92	49	67
+56	14	8
+9	49	55
+6	25	62
+40	75	72
+67	47	10
+46	47	39
+14	97	56
+91	16	27
+95	1	58
+18	100	46
+66	51	69
+15	13	14
+25	9	25
+33	53	44
+30	39	76
+\.
+
+
+--
+-- Name: articulo_pedido_pkey; Type: CONSTRAINT; Schema: public; Owner: ricardo_rodab; Tablespace: 
+--
+
+ALTER TABLE ONLY articulo_pedido
+    ADD CONSTRAINT articulo_pedido_pkey PRIMARY KEY (id_articulo_pedido);
+
+
+--
+-- Name: cliente_pkey; Type: CONSTRAINT; Schema: public; Owner: ricardo_rodab; Tablespace: 
+--
+
+ALTER TABLE ONLY cliente
+    ADD CONSTRAINT cliente_pkey PRIMARY KEY (id_cliente);
+
+
+--
+-- Name: direccion_cliente_pkey; Type: CONSTRAINT; Schema: public; Owner: ricardo_rodab; Tablespace: 
+--
+
+ALTER TABLE ONLY direccion_cliente
+    ADD CONSTRAINT direccion_cliente_pkey PRIMARY KEY (id_cliente);
+
+
+--
+-- Name: direccion_sucursal_pkey; Type: CONSTRAINT; Schema: public; Owner: ricardo_rodab; Tablespace: 
+--
+
+ALTER TABLE ONLY direccion_sucursal
+    ADD CONSTRAINT direccion_sucursal_pkey PRIMARY KEY (id_sucursal);
+
+
+--
+-- Name: distribuidor_pkey; Type: CONSTRAINT; Schema: public; Owner: ricardo_rodab; Tablespace: 
+--
+
+ALTER TABLE ONLY distribuidor
+    ADD CONSTRAINT distribuidor_pkey PRIMARY KEY (id_distribuidor);
+
+
+--
+-- Name: distribuye_a_pkey; Type: CONSTRAINT; Schema: public; Owner: ricardo_rodab; Tablespace: 
+--
+
+ALTER TABLE ONLY distribuye_a
+    ADD CONSTRAINT distribuye_a_pkey PRIMARY KEY (id_distribuidor);
+
+
+--
+-- Name: empleado_pkey; Type: CONSTRAINT; Schema: public; Owner: ricardo_rodab; Tablespace: 
+--
+
+ALTER TABLE ONLY empleado
+    ADD CONSTRAINT empleado_pkey PRIMARY KEY (id_empleado);
+
+
+--
+-- Name: es_dueno_de_pkey; Type: CONSTRAINT; Schema: public; Owner: ricardo_rodab; Tablespace: 
+--
+
+ALTER TABLE ONLY es_dueno_de
+    ADD CONSTRAINT es_dueno_de_pkey PRIMARY KEY (codigo_barras);
+
+
+--
+-- Name: juguete_pkey; Type: CONSTRAINT; Schema: public; Owner: ricardo_rodab; Tablespace: 
+--
+
+ALTER TABLE ONLY juguete
+    ADD CONSTRAINT juguete_pkey PRIMARY KEY (codigo_barras);
+
+
+--
+-- Name: marca_pkey; Type: CONSTRAINT; Schema: public; Owner: ricardo_rodab; Tablespace: 
+--
+
+ALTER TABLE ONLY marca
+    ADD CONSTRAINT marca_pkey PRIMARY KEY (id_marca);
+
+
+--
+-- Name: pedido_pkey; Type: CONSTRAINT; Schema: public; Owner: ricardo_rodab; Tablespace: 
+--
+
+ALTER TABLE ONLY pedido
+    ADD CONSTRAINT pedido_pkey PRIMARY KEY (id_pedido);
+
+
+--
+-- Name: posicion_pkey; Type: CONSTRAINT; Schema: public; Owner: ricardo_rodab; Tablespace: 
+--
+
+ALTER TABLE ONLY posicion
+    ADD CONSTRAINT posicion_pkey PRIMARY KEY (id_posicion);
+
+
+--
+-- Name: realiza_compra_pkey; Type: CONSTRAINT; Schema: public; Owner: ricardo_rodab; Tablespace: 
+--
+
+ALTER TABLE ONLY realiza_compra
+    ADD CONSTRAINT realiza_compra_pkey PRIMARY KEY (id_cliente);
+
+
+--
+-- Name: sucursal_pkey; Type: CONSTRAINT; Schema: public; Owner: ricardo_rodab; Tablespace: 
+--
+
+ALTER TABLE ONLY sucursal
+    ADD CONSTRAINT sucursal_pkey PRIMARY KEY (id_sucursal);
+
+
+--
+-- Name: trabaja_en_pkey; Type: CONSTRAINT; Schema: public; Owner: ricardo_rodab; Tablespace: 
+--
+
+ALTER TABLE ONLY trabaja_en
+    ADD CONSTRAINT trabaja_en_pkey PRIMARY KEY (id_empleado);
+
+
+--
+-- Name: transaccion_pkey; Type: CONSTRAINT; Schema: public; Owner: ricardo_rodab; Tablespace: 
+--
+
+ALTER TABLE ONLY transaccion
+    ADD CONSTRAINT transaccion_pkey PRIMARY KEY (codigo_barras, id_pedido, id_sucursal);
+
+
+--
+-- Name: direccion_cliente_id_cliente_fkey; Type: FK CONSTRAINT; Schema: public; Owner: ricardo_rodab
+--
+
+ALTER TABLE ONLY direccion_cliente
+    ADD CONSTRAINT direccion_cliente_id_cliente_fkey FOREIGN KEY (id_cliente) REFERENCES cliente(id_cliente);
+
+
+--
+-- Name: direccion_sucursal_id_sucursal_fkey; Type: FK CONSTRAINT; Schema: public; Owner: ricardo_rodab
+--
+
+ALTER TABLE ONLY direccion_sucursal
+    ADD CONSTRAINT direccion_sucursal_id_sucursal_fkey FOREIGN KEY (id_sucursal) REFERENCES sucursal(id_sucursal);
+
+
+--
+-- Name: distribuye_a_id_distribuidor_fkey; Type: FK CONSTRAINT; Schema: public; Owner: ricardo_rodab
+--
+
+ALTER TABLE ONLY distribuye_a
+    ADD CONSTRAINT distribuye_a_id_distribuidor_fkey FOREIGN KEY (id_distribuidor) REFERENCES distribuidor(id_distribuidor);
+
+
+--
+-- Name: distribuye_a_id_marca_fkey; Type: FK CONSTRAINT; Schema: public; Owner: ricardo_rodab
+--
+
+ALTER TABLE ONLY distribuye_a
+    ADD CONSTRAINT distribuye_a_id_marca_fkey FOREIGN KEY (id_marca) REFERENCES marca(id_marca);
+
+
+--
+-- Name: empleado_id_posicion_fkey; Type: FK CONSTRAINT; Schema: public; Owner: ricardo_rodab
+--
+
+ALTER TABLE ONLY empleado
+    ADD CONSTRAINT empleado_id_posicion_fkey FOREIGN KEY (id_posicion) REFERENCES posicion(id_posicion);
+
+
+--
+-- Name: es_dueno_de_codigo_barras_fkey; Type: FK CONSTRAINT; Schema: public; Owner: ricardo_rodab
+--
+
+ALTER TABLE ONLY es_dueno_de
+    ADD CONSTRAINT es_dueno_de_codigo_barras_fkey FOREIGN KEY (codigo_barras) REFERENCES juguete(codigo_barras);
+
+
+--
+-- Name: es_dueno_de_id_marca_fkey; Type: FK CONSTRAINT; Schema: public; Owner: ricardo_rodab
+--
+
+ALTER TABLE ONLY es_dueno_de
+    ADD CONSTRAINT es_dueno_de_id_marca_fkey FOREIGN KEY (id_marca) REFERENCES marca(id_marca);
+
+
+--
+-- Name: pedido_id_articulo_pedido_fkey; Type: FK CONSTRAINT; Schema: public; Owner: ricardo_rodab
+--
+
+ALTER TABLE ONLY pedido
+    ADD CONSTRAINT pedido_id_articulo_pedido_fkey FOREIGN KEY (id_articulo_pedido) REFERENCES articulo_pedido(id_articulo_pedido);
+
+
+--
+-- Name: realiza_compra_id_cliente_fkey; Type: FK CONSTRAINT; Schema: public; Owner: ricardo_rodab
+--
+
+ALTER TABLE ONLY realiza_compra
+    ADD CONSTRAINT realiza_compra_id_cliente_fkey FOREIGN KEY (id_cliente) REFERENCES cliente(id_cliente);
+
+
+--
+-- Name: realiza_compra_id_pedido_fkey; Type: FK CONSTRAINT; Schema: public; Owner: ricardo_rodab
+--
+
+ALTER TABLE ONLY realiza_compra
+    ADD CONSTRAINT realiza_compra_id_pedido_fkey FOREIGN KEY (id_pedido) REFERENCES pedido(id_pedido);
+
+
+--
+-- Name: trabaja_en_id_empleado_fkey; Type: FK CONSTRAINT; Schema: public; Owner: ricardo_rodab
+--
+
+ALTER TABLE ONLY trabaja_en
+    ADD CONSTRAINT trabaja_en_id_empleado_fkey FOREIGN KEY (id_empleado) REFERENCES empleado(id_empleado);
+
+
+--
+-- Name: trabaja_en_id_sucursal_fkey; Type: FK CONSTRAINT; Schema: public; Owner: ricardo_rodab
+--
+
+ALTER TABLE ONLY trabaja_en
+    ADD CONSTRAINT trabaja_en_id_sucursal_fkey FOREIGN KEY (id_sucursal) REFERENCES sucursal(id_sucursal);
+
+
+--
+-- Name: transaccion_codigo_barras_fkey; Type: FK CONSTRAINT; Schema: public; Owner: ricardo_rodab
+--
+
+ALTER TABLE ONLY transaccion
+    ADD CONSTRAINT transaccion_codigo_barras_fkey FOREIGN KEY (codigo_barras) REFERENCES juguete(codigo_barras);
+
+
+--
+-- Name: transaccion_id_pedido_fkey; Type: FK CONSTRAINT; Schema: public; Owner: ricardo_rodab
+--
+
+ALTER TABLE ONLY transaccion
+    ADD CONSTRAINT transaccion_id_pedido_fkey FOREIGN KEY (id_pedido) REFERENCES pedido(id_pedido);
+
+
+--
+-- Name: transaccion_id_sucursal_fkey; Type: FK CONSTRAINT; Schema: public; Owner: ricardo_rodab
+--
+
+ALTER TABLE ONLY transaccion
+    ADD CONSTRAINT transaccion_id_sucursal_fkey FOREIGN KEY (id_sucursal) REFERENCES sucursal(id_sucursal);
+
+
+--
+-- Name: public; Type: ACL; Schema: -; Owner: ricardo_rodab
+--
+
+REVOKE ALL ON SCHEMA public FROM PUBLIC;
+REVOKE ALL ON SCHEMA public FROM ricardo_rodab;
+GRANT ALL ON SCHEMA public TO ricardo_rodab;
+GRANT ALL ON SCHEMA public TO PUBLIC;
+
+
+--
+-- Name: direccion_cliente; Type: ACL; Schema: public; Owner: ricardo_rodab
+--
+
+REVOKE ALL ON TABLE direccion_cliente FROM PUBLIC;
+REVOKE ALL ON TABLE direccion_cliente FROM ricardo_rodab;
+GRANT ALL ON TABLE direccion_cliente TO ricardo_rodab;
+
+
+--
+-- Name: direccion_sucursal; Type: ACL; Schema: public; Owner: ricardo_rodab
+--
+
+REVOKE ALL ON TABLE direccion_sucursal FROM PUBLIC;
+REVOKE ALL ON TABLE direccion_sucursal FROM ricardo_rodab;
+GRANT ALL ON TABLE direccion_sucursal TO ricardo_rodab;
+
+
+--
+-- Name: distribuidor; Type: ACL; Schema: public; Owner: ricardo_rodab
+--
+
+REVOKE ALL ON TABLE distribuidor FROM PUBLIC;
+REVOKE ALL ON TABLE distribuidor FROM ricardo_rodab;
+GRANT ALL ON TABLE distribuidor TO ricardo_rodab;
+GRANT SELECT ON TABLE distribuidor TO atd WITH GRANT OPTION;
+
+
+--
+-- Name: empleado; Type: ACL; Schema: public; Owner: ricardo_rodab
+--
+
+REVOKE ALL ON TABLE empleado FROM PUBLIC;
+REVOKE ALL ON TABLE empleado FROM ricardo_rodab;
+GRANT ALL ON TABLE empleado TO ricardo_rodab;
+GRANT SELECT ON TABLE empleado TO atd WITH GRANT OPTION;
+
+
+--
+-- Name: juguete; Type: ACL; Schema: public; Owner: ricardo_rodab
+--
+
+REVOKE ALL ON TABLE juguete FROM PUBLIC;
+REVOKE ALL ON TABLE juguete FROM ricardo_rodab;
+GRANT ALL ON TABLE juguete TO ricardo_rodab;
+GRANT SELECT ON TABLE juguete TO migmor WITH GRANT OPTION;
+
+
+--
+-- Name: marca; Type: ACL; Schema: public; Owner: ricardo_rodab
+--
+
+REVOKE ALL ON TABLE marca FROM PUBLIC;
+REVOKE ALL ON TABLE marca FROM ricardo_rodab;
+GRANT ALL ON TABLE marca TO ricardo_rodab;
+GRANT SELECT ON TABLE marca TO migmor WITH GRANT OPTION;
+
+
+--
+-- PostgreSQL database dump complete
+--
+

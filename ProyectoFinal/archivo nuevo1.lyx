@@ -1,0 +1,998 @@
+#LyX 2.1 created this file. For more info see http://www.lyx.org/
+\lyxformat 474
+\begin_document
+\begin_header
+\textclass article
+\use_default_options true
+\maintain_unincluded_children false
+\language english
+\language_package default
+\inputencoding auto
+\fontencoding global
+\font_roman default
+\font_sans default
+\font_typewriter default
+\font_math auto
+\font_default_family default
+\use_non_tex_fonts false
+\font_sc false
+\font_osf false
+\font_sf_scale 100
+\font_tt_scale 100
+\graphics default
+\default_output_format default
+\output_sync 0
+\bibtex_command default
+\index_command default
+\paperfontsize default
+\use_hyperref false
+\papersize default
+\use_geometry false
+\use_package amsmath 1
+\use_package amssymb 1
+\use_package cancel 1
+\use_package esint 1
+\use_package mathdots 1
+\use_package mathtools 1
+\use_package mhchem 1
+\use_package stackrel 1
+\use_package stmaryrd 1
+\use_package undertilde 1
+\cite_engine basic
+\cite_engine_type default
+\biblio_style plain
+\use_bibtopic false
+\use_indices false
+\paperorientation portrait
+\suppress_date false
+\justification true
+\use_refstyle 1
+\index Index
+\shortcut idx
+\color #008000
+\end_index
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation indent
+\paragraph_indentation default
+\quotes_language english
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+\tracking_changes false
+\output_changes false
+\html_math_output 0
+\html_css_as_file 0
+\html_be_strict false
+\end_header
+
+\begin_body
+
+\begin_layout Title
+Fundamentos de Bases de Datos 2016-1 
+\begin_inset Newline newline
+\end_inset
+
+Proyecto Final
+\end_layout
+
+\begin_layout Author
+José Ricardo Rodríguez Abreu 
+\begin_inset Newline newline
+\end_inset
+
+Ricardo Taboada Magallanes 
+\begin_inset Newline newline
+\end_inset
+
+Ricardo Jimíenez Méndez
+\end_layout
+
+\begin_layout Date
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+today
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+begin{center}
+\end_layout
+
+\end_inset
+
+ Facultad de Ciencias UNAM 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+end{center}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+begin{center}    
+\end_layout
+
+\begin_layout Plain Layout
+
+{
+\backslash
+bf 1.
+ Ideas generales del proyecto:}
+\end_layout
+
+\begin_layout Plain Layout
+
+ 
+\backslash
+end{center}  La idea de crear y mantener una base de datos sobre una jugueter
+\backslash
+'{
+\backslash
+i}a, nace a partir de querer tener un orden respecto a los distintos procesos
+ que podemos realizar en 
+\backslash
+'esta.
+ 
+\backslash
+
+\backslash
+  La simple necesidad de conocer los productos que se venden hasta poder
+ administrar los empleados, ingresos y egresos que se generan para mantener
+ as
+\backslash
+'{
+\backslash
+i}, un balance respecto al capital.
+ Los actores integrados en el servicio de venta de m
+\backslash
+'ultiples productos y su distribuci
+\backslash
+'on en m
+\backslash
+'ultiples marcas y juguetes.
+ Tambi
+\backslash
+'en se puede implementar un sistema de compra diferente y eficiente al ser
+ todo automatizado y garantizando su seguridad.
+\end_layout
+
+\begin_layout Plain Layout
+
+ 
+\backslash
+begin{center}    {
+\backslash
+bf 2.
+ Listado de supusestos:}  
+\backslash
+end{center}    
+\backslash
+begin{enumerate}  
+\backslash
+item Poder ver y buscar que juguetes se venden.
+  
+\backslash
+item Realizar venta de jueguetes a usuarios.
+  
+\backslash
+item Realizar compra de jueguetes a distintos distribuidores de marcas como
+ Mattel, Playmobile, etc.
+  
+\backslash
+item Tener informaci
+\backslash
+'on sobre la disponibilidad de juguetes en distintas tiendas en tiempo real.
+  
+\backslash
+item Cotejar un balance sobre la cantidad ganada y gastada para obtener
+ un ingreso bruto de la suma del conjunto de todas las tiendas.
+  
+\backslash
+item Poder realizar altas/bajas de empleados, usuarios registrados y juguetes
+ fuera de existencia.
+  
+\backslash
+item Modificar el precio de los productos de compra/venta.
+ En especial el de los juguetes y el pago a empleados.
+  
+\backslash
+item Dar de alta/baja una nueva tienda.
+  
+\backslash
+item Poder sacar el monto total de pago para cada empleado dependiendo de
+ su posici
+\backslash
+'on, fecha de ingreso y ventas que ha hecho y cambiar de posici
+\backslash
+'on a cada empleado cuando cumpla cierto tiempo.
+  
+\backslash
+item Tener un sistema de pedidos donde podamos ver el cliente, quien hizo
+ la transacci
+\backslash
+'on, el lugar en el que fue hecha y la fecha.
+ 
+\backslash
+end{enumerate}
+\end_layout
+
+\begin_layout Plain Layout
+
+ 
+\backslash
+begin{center}    {
+\backslash
+bf 3.
+ Requerimientos candidatos: }  
+\backslash
+end{center}
+\end_layout
+
+\begin_layout Plain Layout
+
+ 
+\backslash
+begin{enumerate}  
+\backslash
+item Juguete
+\backslash
+
+\backslash
+    Descripci
+\backslash
+'on: Es el art
+\backslash
+'{
+\backslash
+i}culo principal de toda la tienda.
+ Es lo que se va a vender y comprar.
+ 
+\backslash
+
+\backslash
+
+\end_layout
+
+\begin_layout Plain Layout
+
+   Valores:
+\backslash
+
+\backslash
+    a) Estado: Aprovado.
+ 
+\backslash
+
+\backslash
+    b) Costo: 2 semanas.
+ 
+\backslash
+
+\backslash
+    c) Prioridad: Cr
+\backslash
+'{
+\backslash
+i}tico.
+\backslash
+
+\backslash
+    d) Nivel de riezgo: Grave.
+ 
+\backslash
+
+\backslash
+    
+\backslash
+
+\backslash
+  
+\backslash
+item Marca
+\backslash
+
+\backslash
+    Descripci
+\backslash
+'on: Cada uno de los jueguetes se clasifican a su vez por algunas marcas.
+\backslash
+
+\backslash
+
+\end_layout
+
+\begin_layout Plain Layout
+
+   Valores:
+\backslash
+
+\backslash
+    a) Estado: Validado.
+ 
+\backslash
+
+\backslash
+    b) Costo: 1 semana.
+\backslash
+
+\backslash
+    c) Prioridad: Importante.
+\backslash
+
+\backslash
+    d) Nivel de riezgo: Significativo.
+\backslash
+
+\backslash
+    
+\backslash
+
+\backslash
+
+\end_layout
+
+\begin_layout Plain Layout
+
+   
+\backslash
+item Distribuidor
+\backslash
+
+\backslash
+    Descripci
+\backslash
+'on: Es quien nos va a vender los juguetes a precio de mayoreo.
+\backslash
+
+\backslash
+
+\end_layout
+
+\begin_layout Plain Layout
+
+   Valores:
+\backslash
+
+\backslash
+    a) Estado: Validado.
+\backslash
+
+\backslash
+    b) Costo: 1 semana.
+\backslash
+
+\backslash
+    c) Prioridad: Importante.
+\backslash
+
+\backslash
+    d) Nivel de riezgo: Significativo.
+\backslash
+
+\backslash
+    
+\backslash
+
+\backslash
+
+\end_layout
+
+\begin_layout Plain Layout
+
+   
+\backslash
+item Sucursal
+\backslash
+
+\backslash
+    Descripci
+\backslash
+'on: Es el destino de los juguetes y es donde cada distribuidor llevar
+\backslash
+'a los juguetes luego de ser comprados.
+\backslash
+
+\backslash
+
+\end_layout
+
+\begin_layout Plain Layout
+
+   Valores:
+\backslash
+
+\backslash
+    a) Estado: Aprovado.
+\backslash
+
+\backslash
+    b) Costo: 1 semana.
+\backslash
+
+\backslash
+    c) Prioridad: Secundario.
+\backslash
+
+\backslash
+    d) Nivel de riezgo: Medio.
+\backslash
+
+\backslash
+    
+\backslash
+
+\backslash
+
+\end_layout
+
+\begin_layout Plain Layout
+
+   
+\backslash
+item Empleado
+\backslash
+
+\backslash
+    Descripci
+\backslash
+'on: Es la persona que realiza las ventas en la tienda y tiene un costo
+ elevado de p
+\backslash
+'erdida.
+ 
+\backslash
+
+\backslash
+
+\end_layout
+
+\begin_layout Plain Layout
+
+   Valores:
+\backslash
+
+\backslash
+    a) Estado: Aprovado.
+\backslash
+
+\backslash
+    b) Costo: 3 d
+\backslash
+'{
+\backslash
+i}as.
+\backslash
+
+\backslash
+    c) Prioridad: Secundario.
+\backslash
+
+\backslash
+    d) Nivel de riezgo: Ordinario.
+\backslash
+
+\backslash
+    
+\backslash
+
+\backslash
+
+\end_layout
+
+\begin_layout Plain Layout
+
+   
+\backslash
+item Cliente
+\backslash
+
+\backslash
+    Descripci
+\backslash
+'on: Es el destino final de algunos de los juguetes.
+ Es quien realiza las compras en tienda (posiblemente en l
+\backslash
+'{
+\backslash
+i}nea).
+\backslash
+
+\backslash
+
+\end_layout
+
+\begin_layout Plain Layout
+
+   Valores:
+\backslash
+
+\backslash
+    a) Estado: Aprovado.
+\backslash
+
+\backslash
+    b) Costo: 1 semana.
+\backslash
+
+\backslash
+    c) Prioridad: Importante.
+\backslash
+
+\backslash
+    d) Nivel de riezgo: Grave.
+\backslash
+
+\backslash
+    
+\backslash
+
+\backslash
+
+\end_layout
+
+\begin_layout Plain Layout
+
+   
+\backslash
+item Pedido
+\backslash
+
+\backslash
+    Descripci
+\backslash
+'on: Es el sistema que daremos para procesar una compra.
+\backslash
+
+\backslash
+
+\end_layout
+
+\begin_layout Plain Layout
+
+   Valores:
+\backslash
+
+\backslash
+    a) Estado: Propuesto.
+\backslash
+
+\backslash
+    b) Costo: 1 semana.
+\backslash
+
+\backslash
+    c) Prioridad: Importante.
+\backslash
+
+\backslash
+    d) Nivel de riezgo: Medio.
+\backslash
+
+\backslash
+  
+\backslash
+end{enumerate}
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+ 
+\backslash
+begin{center}    {
+\backslash
+bf 4.
+ Requerimientos funcionales: }  
+\backslash
+end{center}   
+\end_layout
+
+\begin_layout Plain Layout
+
+a) Agregar y eliminar objetos:  
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+begin{enumerate}  
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+item Juguetes.
+\end_layout
+
+\begin_layout Plain Layout
+
+ 
+\backslash
+item Empleados.
+\end_layout
+
+\begin_layout Plain Layout
+
+ 
+\backslash
+item Sucursales.
+\end_layout
+
+\begin_layout Plain Layout
+
+ 
+\backslash
+item Clientes.
+ 
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+item Marcas.
+  
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+item Distribuidores.
+  
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+end{enumerate}  
+\end_layout
+
+\begin_layout Plain Layout
+
+b) Poder realizar el pago a los empleados.
+ 
+\backslash
+
+\backslash
+  
+\end_layout
+
+\begin_layout Plain Layout
+
+c) Optener ingresos.
+ 
+\backslash
+
+\backslash
+  
+\end_layout
+
+\begin_layout Plain Layout
+
+d) Realizar compra.
+ 
+\backslash
+
+\backslash
+ 
+\end_layout
+
+\begin_layout Plain Layout
+
+ 
+\end_layout
+
+\begin_layout Plain Layout
+
+ 
+\backslash
+begin{center}    {
+\backslash
+bf 5.
+ Requerimientos no funcionales no asociados: }  
+\backslash
+end{center}
+\end_layout
+
+\begin_layout Plain Layout
+
+ a) Poder ver fotos de los productos.
+ 
+\backslash
+
+\backslash
+  b) Realizar un feedback del servicio.
+ 
+\backslash
+
+\backslash
+  
+\end_layout
+
+\begin_layout Plain Layout
+
+ 
+\backslash
+begin{center}    {
+\backslash
+bf 6.
+ Requerimientos no funcionales asociados: }  
+\backslash
+end{center}
+\end_layout
+
+\begin_layout Plain Layout
+
+ a) Promociones.
+ 
+\backslash
+
+\backslash
+     
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection*
+Diagrama E/R
+\end_layout
+
+\begin_layout Standard
+\begin_inset Graphics
+	filename CC_2016-1/bases_datos/ProyectoFinal/DiagramaE:R.png
+	width 13cm
+	height 20cm
+	rotateAngle 90
+	rotateOrigin leftBaseline
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection*
+Diagrama de clases
+\end_layout
+
+\begin_layout Standard
+\begin_inset Graphics
+	filename CC_2016-1/bases_datos/ProyectoFinal/Diagrama_de_clases.png
+	width 60page%
+	height 60pheight%
+	rotateAngle 90
+	rotateOrigin center
+
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection*
+Dependencias Funcionales 
+\end_layout
+
+\begin_layout Subsection*
+\begin_inset Graphics
+	filename /Users/ricardo_rodab/Desktop/Captura de pantalla 2015-11-26 a la(s) 2.19.01 p.m..png
+	width 60page%
+	height 60pheight%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset space \textvisiblespace{}
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection*
+Dependencias Funcionales 
+\end_layout
+
+\begin_layout Standard
+\begin_inset Graphics
+	filename /Users/ricardo_rodab/Desktop/Captura de pantalla 2015-11-26 a la(s) 2.19.10 p.m..png
+	width 100text%
+	height 60pheight%
+
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection*
+Restricciones de integridad
+\end_layout
+
+\begin_layout Subsubsection*
+Tabla juguete:
+\end_layout
+
+\begin_layout Standard
+codigo_barras NOT NULL PRIMARY KEY
+\end_layout
+
+\begin_layout Standard
+nombre_juguete NOT NULL
+\end_layout
+
+\begin_layout Standard
+precio CHECK (precio >= 0)
+\end_layout
+
+\begin_layout Standard
+clasificacion NOT NULL 
+\end_layout
+
+\begin_layout Subsubsection*
+Tabla sucursal:
+\end_layout
+
+\begin_layout Standard
+id_sucursal NOT NULL PRIMARY KEY
+\end_layout
+
+\begin_layout Standard
+nombre_sucursal NOT NULL
+\end_layout
+
+\begin_layout Standard
+telefono_sucursal NOT NULL
+\end_layout
+
+\begin_layout Subsubsection*
+Tabla cliente: 
+\end_layout
+
+\begin_layout Standard
+id_cliente NOT NULL PRIMARY KEY
+\end_layout
+
+\begin_layout Standard
+nombre_cliente NOT NULL 
+\end_layout
+
+\begin_layout Standard
+correo character varying(50) NOT NULL
+\begin_inset Newline newline
+\end_inset
+
+Tabla distribuidor: 
+\end_layout
+
+\begin_layout Standard
+id_distribuidor NOT NULL PRIMARY KEY
+\end_layout
+
+\begin_layout Standard
+nombre_distribuidor NOT NULL.
+\end_layout
+
+\begin_layout Subsubsection*
+Tabla marca: 
+\end_layout
+
+\begin_layout Standard
+id_marca NOT NULL PRIMARY KEY
+\end_layout
+
+\begin_layout Standard
+nombre_marca NOT NULL
+\end_layout
+
+\begin_layout Subsubsection*
+Tabla posicion:
+\end_layout
+
+\begin_layout Standard
+id_posicion NOT NULL PRIMARY KEY
+\end_layout
+
+\begin_layout Standard
+posicion NOT NULL 
+\end_layout
+
+\begin_layout Subsubsection*
+Tabla articulo_pedido: 
+\end_layout
+
+\begin_layout Standard
+id_articulo_pedido NOT NULL PRIMARY KEY
+\end_layout
+
+\begin_layout Standard
+numero_articulos NOT NULL
+\end_layout
+
+\begin_layout Standard
+total CHECK (total >= 0)
+\end_layout
+
+\begin_layout Subsubsection*
+Tabla empleado: 
+\end_layout
+
+\begin_layout Standard
+id_empleado NOT NULL PRIMARY KEY
+\end_layout
+
+\begin_layout Standard
+rfc_empleado NOT NULL
+\end_layout
+
+\begin_layout Standard
+nombre_empleado NOT NULL
+\end_layout
+
+\begin_layout Standard
+apellido_materno_empleado NOT NULL
+\end_layout
+
+\begin_layout Standard
+apellido_paterno_empleado NOT NULL
+\end_layout
+
+\begin_layout Standard
+fecha_nacimiento NOT NULL
+\begin_inset Newline newline
+\end_inset
+
+
+\end_layout
+
+\end_body
+\end_document
